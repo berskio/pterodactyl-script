@@ -7,6 +7,8 @@ output "${BLUE}Installing MariaDB..."
 if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
     update_upgrade
 
+    apt install -y mariadb-server
+
     if [ "$SETUP_FIREWALL" = true ]; then
         output "Setup Firewall..."
         setup_ufw
