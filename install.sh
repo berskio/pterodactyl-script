@@ -101,23 +101,21 @@ while true; do
         case $option in
         "Install Panel")
             bash <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/panel.sh")
+            printf "\n\n\n"
             break
             ;;
         "Install Wings")
             bash <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/wings.sh")
+            printf "\n\n\n"
             break
             ;;
         "Quit")
             break 2
             ;;
         *)
-            error "Invalid option!"
+            break
             ;;
         esac
     done
-
-    echo
-    echo
-    echo
 done
 #endregion
