@@ -3,6 +3,24 @@ set -e
 
 VERSION="0.0.1"
 
+#region User Variables
+PASSWORD_LENGTH=64
+
+SETUP_LETSENCRYPT=true
+SETUP_MAIL=false
+
+DBPANEL_DB="panel"
+DBPANEL_USER="pterodactyl"
+DBPANEL_PASSWORD=""
+
+DBHOST_USER="pterodactyluser"
+DBHOST_PASSWORD=""
+
+DB_ROOT_PASSWORD=""
+
+PHP_VERSION=8.0
+#endregion
+
 #region Text Formatting
 NC="\033[0m" # Normal Color
 RED="\033[1;31m"
@@ -99,12 +117,12 @@ while true; do
     select option in "${options[@]}"; do
         case $option in
         "Install Panel")
-            bash <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/panel.sh")
+            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/panel.sh")
             printf "\n\n\nPlease select an option:\n"
             break
             ;;
         "Install Wings")
-            bash <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/wings.sh")
+            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/wings.sh")
             printf "\n\n\nPlease select an option:\n"
             break
             ;;
