@@ -110,6 +110,9 @@ while true; do
         "Quit")
             break 2
             ;;
+        "")
+            error "Invalid option!"
+            ;;
         *)
             error "Invalid option!"
             ;;
