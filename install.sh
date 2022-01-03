@@ -115,7 +115,7 @@ curl -s -L "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/dev
 NEW_VER=$(grep "^VERSION" "$TMP_FILE" | awk -F'[="]' '{print $3}')
 
 if [[ "$VERSION" < "$NEW_VER" ]]; then
-    output "${GREEN}Update script from ${RED}v${VERSION} ${NC}to ${YELLOW}v${NEW_VER}"
+    output "${GREEN}Update script from ${RED}v${VERSION} ${GREEN}to ${YELLOW}v${NEW_VER}"
     cp -f "$TMP_FILE" "$ABS_SCRIPT_PATH" || error "Unable to update script!"
 else
     output "${GREEN}Already have the latest version."
@@ -128,7 +128,7 @@ echo "Please select an option:"
 
 while true; do
     options=(
-        "Install Database (MariaDB)"
+        "Install MariaDB"
         "Install Panel"
         "Install Wings"
         "Settings"
@@ -137,7 +137,7 @@ while true; do
 
     select option in "${options[@]}"; do
         case $option in
-        "Install Database (MariaDB)")
+        "Install MariaDB")
             . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-mariadb.sh")
             printf "\n\n\nPlease select an option:\n"
             break
