@@ -86,9 +86,9 @@ fi
 #endregion
 
 #region Selection Menu
-while true; do
-    clear -x
+clear -x
 
+while true; do
     echo "Please select an option:"
 
     options=(
@@ -115,5 +115,9 @@ while true; do
             ;;
         esac
     done
+
+    echo
+    echo
+    echo
 done
 #endregion
