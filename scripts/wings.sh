@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
 
-output "WINGS"
+output "$PASSWORD_LENGTH"
