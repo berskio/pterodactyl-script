@@ -118,6 +118,8 @@ if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok ins
     output
     output "Root Password: $DB_ROOT_PASSWORD"
     output
+    output "--------------------------------------------"
+    output
 else
     error "MariaDB is already installed! Uninstall MariaDB first before you continue."
     exit 1

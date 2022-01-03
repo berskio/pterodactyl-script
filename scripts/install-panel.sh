@@ -55,6 +55,7 @@ if [ "$SETUP_LETSENCRYPT" = true ]; then
         output "Please enter the email address for the SSL certificate: "
         read LE_EMAIL
 
+        output
         #region Install Certbot
         output "Install Certbot..."
         apt-get install -y snapd
@@ -171,8 +172,8 @@ else
     curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/configs/nginx.conf"
 fi
 
-sed -i -e "s@<domain>@${PANEL_FQDN}@g" /etc/nginx/conf.d/pterodactyl.conf
-sed -i -e "s@<php_version>@${PHP_VERSION}@g" /etc/nginx/conf.d/pterodactyl.conf
+sed -i -e "s@<domain>@${PANEL_FQDN}@g" /etc/nginx/sites-available/pterodactyl.conf
+sed -i -e "s@<php_version>@${PHP_VERSION}@g" /etc/nginx/sites-available/pterodactyl.conf
 
 if [ ! -L "/etc/nginx/sites-enabled/pterodactyl.conf" ]; then
     ln -s /etc/nginx/sites-available/pterodactyl.conf /etc/nginx/sites-enabled/pterodactyl.conf
