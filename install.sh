@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="0.0.1"
+VERSION="0.0.2"
 
 #region User Variables
 PASSWORD_LENGTH=64
@@ -11,6 +11,8 @@ SETUP_LETSENCRYPT=true
 SETUP_MAIL=false
 SETUP_DBPANEL=true
 SETUP_DBHOST=true
+
+NGINX_SSL=true
 
 DBPANEL_DB="panel"
 DBPANEL_USER="pterodactyl"

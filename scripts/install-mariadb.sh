@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-output "${BLUE}Installing MariaDB..."
+output "${BLUE}Install MariaDB..."
 
 # Check if already Installed
 if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
@@ -9,11 +9,13 @@ if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok ins
 
     apt install -y mariadb-server
 
+    #region Setup Firewall
     if [ "$SETUP_FIREWALL" = true ]; then
         output "Setup Firewall..."
         setup_ufw
         ufw allow 3306
     fi
+    #endregion
 
     if [ -z "$DB_ROOT_PASSWORD"]; then
         DB_ROOT_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
