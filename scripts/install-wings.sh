@@ -25,6 +25,7 @@ if [ "$SETUP_LETSENCRYPT" = true ]; then
     output "Please enter the email address for the SSL certificate: "
     read LE_EMAIL
 
+    output
     output "Is the Panel running on this Machine? (Y/n): "
     read -r RUNS_WEBSERVER
 
