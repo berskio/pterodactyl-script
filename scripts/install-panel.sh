@@ -50,46 +50,44 @@ read PANEL_FQDN
 
 #region Setup Let’s Encrypt
 if [ "$SETUP_LETSENCRYPT" = true ]; then
-    if [ ! -x "$(command -v certbot)" ]; then
-        output
-        output "Please enter the email address for the SSL certificate: "
-        read LE_EMAIL
+    output
+    output "Please enter the email address for the SSL certificate: "
+    read LE_EMAIL
 
-        output
-        #region Install Certbot
-        output "Install Certbot..."
-        apt-get install -y snapd
-        snap install core
-        snap refresh core
-        apt-get remove -y certbot
-        snap install --classic certbot
+    output
+    #region Install Certbot
+    output "Install Certbot..."
+    apt-get install -y snapd
+    snap install core
+    snap refresh core
+    apt-get remove -y certbot
+    snap install --classic certbot
+
+    if [ ! -L "/usr/bin/certbot" ]; then
         ln -s /snap/bin/certbot /usr/bin/certbot
-        #endregion
-
-        #region Setup Webserver without SSL
-        if [ -f "/etc/nginx/sites-enabled/default" ]; then
-            rm /etc/nginx/sites-enabled/default
-        fi
-
-        curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/configs/nginx.conf"
-
-        sed -i -e "s@<domain>@${PANEL_FQDN}@g" /etc/nginx/sites-available/pterodactyl.conf
-        sed -i -e "s@<php_version>@${PHP_VERSION}@g" /etc/nginx/sites-available/pterodactyl.conf
-
-        if [ ! -L "/etc/nginx/sites-enabled/pterodactyl.conf" ]; then
-            ln -s /etc/nginx/sites-available/pterodactyl.conf /etc/nginx/sites-enabled/pterodactyl.conf
-        fi
-
-        systemctl restart nginx
-
-        mkdir -p /var/www/pterodactyl/public
-
-        certbot certonly --webroot -w /var/www/pterodactyl/public --email "$LE_EMAIL" --agree-tos -d "$PANEL_FQDN" --non-interactive
-        #endregion
-    else
-        error "Certbot is already installed! Disable Let's Encrypt in the Settings or Uninstall first to continue."
-        exit 1
     fi
+    #endregion
+
+    #region Setup Webserver without SSL
+    if [ -f "/etc/nginx/sites-enabled/default" ]; then
+        rm /etc/nginx/sites-enabled/default
+    fi
+
+    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/configs/nginx.conf"
+
+    sed -i -e "s@<domain>@${PANEL_FQDN}@g" /etc/nginx/sites-available/pterodactyl.conf
+    sed -i -e "s@<php_version>@${PHP_VERSION}@g" /etc/nginx/sites-available/pterodactyl.conf
+
+    if [ ! -L "/etc/nginx/sites-enabled/pterodactyl.conf" ]; then
+        ln -s /etc/nginx/sites-available/pterodactyl.conf /etc/nginx/sites-enabled/pterodactyl.conf
+    fi
+
+    systemctl restart nginx
+
+    mkdir -p /var/www/pterodactyl/public
+
+    certbot certonly --webroot -w /var/www/pterodactyl/public --email "$LE_EMAIL" --agree-tos -d "$PANEL_FQDN" --non-interactive
+    #endregion
 fi
 #endregion
 
