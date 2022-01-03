@@ -100,11 +100,11 @@ while true; do
     select option in "${options[@]}"; do
         case $option in
         "Install Panel")
-            ("https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/panel.sh")
+            bash <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/panel.sh")
             break
             ;;
         "Install Wings")
-            ("https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/wings.sh")
+            bash <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/wings.sh")
             break
             ;;
         "Quit")
