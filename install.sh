@@ -6,8 +6,11 @@ VERSION="0.0.1"
 #region User Variables
 PASSWORD_LENGTH=64
 
+SETUP_FIREWALL=true
 SETUP_LETSENCRYPT=true
 SETUP_MAIL=false
+SETUP_DBPANEL=true
+SETUP_DBHOST=true
 
 DBPANEL_DB="panel"
 DBPANEL_USER="pterodactyl"
@@ -20,6 +23,8 @@ DB_ROOT_PASSWORD=""
 
 PHP_VERSION=8.0
 #endregion
+
+DB_INSTALLED=false
 
 #region Text Formatting
 NC="\033[0m" # Normal Color
@@ -42,6 +47,18 @@ warning() {
     echo
     echo -e "${YELLOW}WARNING: ${1}${NC}"
     echo
+}
+#endregion
+
+#region Helper Functions
+update_upgrade() {
+    apt update -y && apt upgrade -y
+}
+
+setup_ufw() {
+    apt install -y ufw
+    ufw allow 22
+    yes | ufw enable
 }
 #endregion
 
@@ -109,13 +126,20 @@ echo "Please select an option:"
 
 while true; do
     options=(
+        "Install Database (MariaDB)"
         "Install Panel"
         "Install Wings"
+        "Settings"
         "Quit"
     )
 
     select option in "${options[@]}"; do
         case $option in
+        "Install Database (MariaDB)")
+            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/mariadb.sh")
+            printf "\n\n\nPlease select an option:\n"
+            break
+            ;;
         "Install Panel")
             . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/panel.sh")
             printf "\n\n\nPlease select an option:\n"
@@ -124,6 +148,9 @@ while true; do
         "Install Wings")
             . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/wings.sh")
             printf "\n\n\nPlease select an option:\n"
+            break
+            ;;
+        "Settings")
             break
             ;;
         "Quit")
