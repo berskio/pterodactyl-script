@@ -74,7 +74,7 @@ SCRIPT_LOCATION="${BASH_SOURCE[@]}"
 ABS_SCRIPT_PATH=$(readlink -f "$SCRIPT_LOCATION")
 TMP_FILE=$(mktemp -p "" "XXXXX.sh")
 
-curl -s -L "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/pterodactyl-install.sh" >"$TMP_FILE"
+curl -s -L "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/install.sh" >"$TMP_FILE"
 NEW_VER=$(grep "^VERSION" "$TMP_FILE" | awk -F'[="]' '{print $3}')
 
 if [[ "$VERSION" < "$NEW_VER" ]]; then
@@ -100,11 +100,11 @@ while true; do
     select option in "${options[@]}"; do
         case $option in
         "Install Panel")
-            ("https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/panel.sh")
+            ("https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/panel.sh")
             break
             ;;
         "Install Wings")
-            ("https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/wings.sh")
+            ("https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/wings.sh")
             break
             ;;
         "Quit")
