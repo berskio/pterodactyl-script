@@ -2,8 +2,8 @@
 set -e
 
 VERSION="0.0.1"
-SCRIPT_URL="https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/pterodactyl-install.sh"
 
+#region Text Formatting
 NC="\033[0m" # Normal Color
 RED="\033[1;31m"
 YELLOW="\033[1;33m"
@@ -25,6 +25,7 @@ warning() {
     echo -e "${YELLOW}WARNING: ${1}${NC}"
     echo
 }
+#endregion
 
 #region Check if Root
 if [ "$EUID" -ne 0 ]; then
@@ -73,7 +74,7 @@ SCRIPT_LOCATION="${BASH_SOURCE[@]}"
 ABS_SCRIPT_PATH=$(readlink -f "$SCRIPT_LOCATION")
 TMP_FILE=$(mktemp -p "" "XXXXX.sh")
 
-curl -s -L "$SCRIPT_URL" >"$TMP_FILE"
+curl -s -L "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/pterodactyl-install.sh" >"$TMP_FILE"
 NEW_VER=$(grep "^VERSION" "$TMP_FILE" | awk -F'[="]' '{print $3}')
 
 if [[ "$VERSION" < "$NEW_VER" ]]; then
