@@ -136,17 +136,17 @@ while true; do
     select option in "${options[@]}"; do
         case $option in
         "Install Database (MariaDB)")
-            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/mariadb.sh")
+            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-mariadb.sh")
             printf "\n\n\nPlease select an option:\n"
             break
             ;;
         "Install Panel")
-            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/panel.sh")
+            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-panel.sh")
             printf "\n\n\nPlease select an option:\n"
             break
             ;;
         "Install Wings")
-            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/wings.sh")
+            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-wings.sh")
             printf "\n\n\nPlease select an option:\n"
             break
             ;;
