@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="0.0.3"
+VERSION="0.0.4"
 
 #region User Variables
 PASSWORD_LENGTH=64
@@ -129,8 +129,8 @@ get_latest_release() {
         sed -E 's/.*"([^"]+)".*/\1/'                                  # Pluck JSON value
 }
 
-PANEL_VERSION=get_latest_release "pterodactyl/panel"
-WINGS_VERSION=get_latest_release "pterodactyl/wings"
+PANEL_VERSION=$(get_latest_release "pterodactyl/panel")
+WINGS_VERSION=$(get_latest_release "pterodactyl/wings")
 
 clear -x
 echo "Please select an option:"
