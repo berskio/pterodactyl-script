@@ -14,35 +14,39 @@ if [ "$SETUP_FIREWALL" = true ]; then
 fi
 #endregion
 
-output
-output
-output "Please enter the FQDN of the Node (node.example.com): "
-read HOST_FQDN
-
 #region Setup Let’s Encrypt
 if [ "$SETUP_LETSENCRYPT" = true ]; then
+    output
     output
     output "Is the Panel running on this Machine? (Y/n): "
     read -r RUNS_WEBSERVER
 
     if [[ ! "$RUNS_WEBSERVER" =~ [Nn] ]]; then
         output
-        output "Please enter the email address for the SSL certificate: "
-        read LE_EMAIL
-
-        certbot certonly --standalone --email "$LE_EMAIL" --agree-tos -d "$HOST_FQDN" --non-interactive
-    else
-        output
         output "Is the FQDN of the Wings the same as that from the Panel? (Y/n): "
         read -r SAME_FQDN
 
-        if [[ ! "$SAME_FQDN" =~ [Nn] ]]; then
+        if [[ "$SAME_FQDN" =~ [Nn] ]]; then
+            output
+            output "Please enter the FQDN of the Node (node.example.com): "
+            read HOST_FQDN
+
             output
             output "Please enter the email address for the SSL certificate: "
             read LE_EMAIL
 
             certbot certonly --webroot -w /var/www/pterodactyl/public --email "$LE_EMAIL" --agree-tos -d "$HOST_FQDN" --non-interactive
         fi
+    else
+        output
+        output "Please enter the FQDN of the Node (node.example.com): "
+        read HOST_FQDN
+
+        output
+        output "Please enter the email address for the SSL certificate: "
+        read LE_EMAIL
+
+        certbot certonly --standalone --email "$LE_EMAIL" --agree-tos -d "$HOST_FQDN" --non-interactive
     fi
 
     output
@@ -90,5 +94,5 @@ output "--------------------------------------------"
 output
 output "${BLUE}INFO: It is recommended to reboot your machine now to enable the SWAP in Docker."
 output
-output "Now you just need to add the node with the fqdn \"$HOST_FQDN\" in the panel and change the configuration."
+output "Now you just need to add this Node to the Panel and change the Configuration."
 output
