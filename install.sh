@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="0.0.4"
+VERSION="0.0.5"
 
 #region User Variables
 PASSWORD_LENGTH=64
@@ -152,36 +152,29 @@ while true; do
     1)
         . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-mariadb.sh")
         printf "\n\n\nPlease select an option:\n"
-        break
         ;;
     2)
         . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-panel.sh")
         printf "\n\n\nPlease select an option:\n"
-        break
         ;;
     3)
         . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-wings.sh")
         printf "\n\n\nPlease select an option:\n"
-        break
         ;;
     4)
         . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/update-panel.sh")
         printf "\n\n\nPlease select an option:\n"
-        break
         ;;
     5)
         . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/update-wings.sh")
         printf "\n\n\nPlease select an option:\n"
-        break
         ;;
     8)
-        break
         ;;
     9)
-        break 2
+        break
         ;;
     *)
-        break
         ;;
     esac
 done
