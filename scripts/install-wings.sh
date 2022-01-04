@@ -22,17 +22,27 @@ read HOST_FQDN
 #region Setup Let’s Encrypt
 if [ "$SETUP_LETSENCRYPT" = true ]; then
     output
-    output "Please enter the email address for the SSL certificate: "
-    read LE_EMAIL
-
-    output
     output "Is the Panel running on this Machine? (Y/n): "
     read -r RUNS_WEBSERVER
 
     if [[ ! "$RUNS_WEBSERVER" =~ [Nn] ]]; then
+        output
+        output "Please enter the email address for the SSL certificate: "
+        read LE_EMAIL
+
         certbot certonly --standalone --email "$LE_EMAIL" --agree-tos -d "$HOST_FQDN" --non-interactive
     else
-        certbot certonly --webroot -w /var/www/pterodactyl/public --email "$LE_EMAIL" --agree-tos -d "$HOST_FQDN" --non-interactive
+        output
+        output "Is the FQDN of the Wings the same as that from the Panel? (Y/n): "
+        read -r SAME_FQDN
+
+        if [[ ! "$SAME_FQDN" =~ [Nn] ]]; then
+            output
+            output "Please enter the email address for the SSL certificate: "
+            read LE_EMAIL
+
+            certbot certonly --webroot -w /var/www/pterodactyl/public --email "$LE_EMAIL" --agree-tos -d "$HOST_FQDN" --non-interactive
+        fi
     fi
 
     output

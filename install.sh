@@ -123,45 +123,66 @@ fi
 #endregion
 
 #region Selection Menu
+get_latest_release() {
+    curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+        grep '"tag_name":' |                                          # Get tag line
+        sed -E 's/.*"([^"]+)".*/\1/'                                  # Pluck JSON value
+}
+
+PANEL_VERSION=get_latest_release "pterodactyl/panel"
+WINGS_VERSION=get_latest_release "pterodactyl/wings"
+
 clear -x
 echo "Please select an option:"
 
 while true; do
-    options=(
-        "Install MariaDB"
-        "Install Panel"
-        "Install Wings"
-        "Settings"
-        "Quit"
-    )
+    output "[1] Install MariaDB"
+    output "[2] Install Panel (${PANEL_VERSION})"
+    output "[3] Install Wings (${WINGS_VERSION})"
+    output
+    output "[4] Update Panel to $PANEL_VERSION"
+    output "[5] Update Wings to $WINGS_VERSION"
+    output
+    output "[8] Change Settings"
+    output "[9] Quit"
 
-    select option in "${options[@]}"; do
-        case $option in
-        "Install MariaDB")
-            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-mariadb.sh")
-            printf "\n\n\nPlease select an option:\n"
-            break
-            ;;
-        "Install Panel")
-            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-panel.sh")
-            printf "\n\n\nPlease select an option:\n"
-            break
-            ;;
-        "Install Wings")
-            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-wings.sh")
-            printf "\n\n\nPlease select an option:\n"
-            break
-            ;;
-        "Settings")
-            break
-            ;;
-        "Quit")
-            break 2
-            ;;
-        *)
-            break
-            ;;
-        esac
-    done
+    read -r option
+
+    case $option in
+    1)
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-mariadb.sh")
+        printf "\n\n\nPlease select an option:\n"
+        break
+        ;;
+    2)
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-panel.sh")
+        printf "\n\n\nPlease select an option:\n"
+        break
+        ;;
+    3)
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-wings.sh")
+        printf "\n\n\nPlease select an option:\n"
+        break
+        ;;
+    4)
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/update-panel.sh")
+        printf "\n\n\nPlease select an option:\n"
+        break
+        ;;
+    5)
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/update-wings.sh")
+        printf "\n\n\nPlease select an option:\n"
+        break
+        ;;
+    8)
+        break
+        ;;
+    9)
+        break 2
+        ;;
+    *)
+        break
+        ;;
+    esac
 done
 #endregion
