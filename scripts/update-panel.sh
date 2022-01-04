@@ -10,3 +10,4 @@ php artisan p:upgrade \
 
 output
 output "${GREEN}Panel has been successfully updated."
+output

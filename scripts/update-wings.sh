@@ -10,3 +10,4 @@ systemctl restart wings
 
 output
 output "${GREEN}Wings has been successfully updated."
+output

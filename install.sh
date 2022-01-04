@@ -132,8 +132,9 @@ get_latest_release() {
 PANEL_VERSION=$(get_latest_release "pterodactyl/panel")
 WINGS_VERSION=$(get_latest_release "pterodactyl/wings")
 
+clear -x
+
 while true; do
-    clear -x
     output "Please select an option:"
     output
     output "[1] Install MariaDB"
@@ -171,7 +172,9 @@ while true; do
         exit 0
         ;;
     *) ;;
-
     esac
+
+    output
+    output
 done
 #endregion
