@@ -132,10 +132,10 @@ get_latest_release() {
 PANEL_VERSION=$(get_latest_release "pterodactyl/panel")
 WINGS_VERSION=$(get_latest_release "pterodactyl/wings")
 
-clear -x
-echo "Please select an option:"
-
 while true; do
+    clear -x
+    output "Please select an option:"
+    output
     output "[1] Install MariaDB"
     output "[2] Install Panel (${PANEL_VERSION})"
     output "[3] Install Wings (${WINGS_VERSION})"
@@ -151,31 +151,27 @@ while true; do
     case $option in
     1)
         . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-mariadb.sh")
-        printf "\n\n\nPlease select an option:\n"
         ;;
     2)
         . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-panel.sh")
-        printf "\n\n\nPlease select an option:\n"
         ;;
     3)
         . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-wings.sh")
-        printf "\n\n\nPlease select an option:\n"
         ;;
     4)
         . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/update-panel.sh")
-        printf "\n\n\nPlease select an option:\n"
         ;;
     5)
         . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/update-wings.sh")
-        printf "\n\n\nPlease select an option:\n"
         ;;
     8)
+        echo "Settings"
         ;;
     9)
-        break
+        exit 0
         ;;
-    *)
-        ;;
+    *) ;;
+
     esac
 done
 #endregion
