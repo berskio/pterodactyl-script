@@ -16,6 +16,19 @@ fi
 
 #region Setup Let’s Encrypt
 if [ "$SETUP_LETSENCRYPT" = true ]; then
+    #region Install Certbot
+    output "Install Certbot..."
+    apt-get install -y snapd
+    snap install core
+    snap refresh core
+    apt-get remove -y certbot
+    snap install --classic certbot
+
+    if [ ! -L "/usr/bin/certbot" ]; then
+        ln -s /snap/bin/certbot /usr/bin/certbot
+    fi
+    #endregion
+
     output
     output
     output "Is the Panel running on this Machine? (Y/n): "
@@ -48,20 +61,6 @@ if [ "$SETUP_LETSENCRYPT" = true ]; then
 
         certbot certonly --standalone --email "$LE_EMAIL" --agree-tos -d "$HOST_FQDN" --non-interactive
     fi
-
-    output
-    #region Install Certbot
-    output "Install Certbot..."
-    apt-get install -y snapd
-    snap install core
-    snap refresh core
-    apt-get remove -y certbot
-    snap install --classic certbot
-
-    if [ ! -L "/usr/bin/certbot" ]; then
-        ln -s /snap/bin/certbot /usr/bin/certbot
-    fi
-    #endregion
 fi
 #endregion
 
