@@ -37,7 +37,7 @@ apt install -y nginx
 
 output
 output
-outout "Please enter the FQDN of phpMyAdmin (phpmyadmin.example.com): "
+output "Please enter the FQDN of phpMyAdmin (phpmyadmin.example.com): "
 read PHPMA_FQDN
 
 #region Setup Let’s Encrypt
