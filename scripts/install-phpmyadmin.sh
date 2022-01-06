@@ -84,8 +84,9 @@ fi
 #endregion
 
 output
-output "Please enter the Host of MySQL (localhost): "
+output "Please enter the Host of MySQL [localhost]: "
 read PHPMA_DBHOST
+PHPMA_DBHOST=${PHPMA_DBHOST:-localhost}
 
 #region Install and Setup phpMyAdmin
 output "Install and setup phpMyAdmin..."
@@ -133,5 +134,5 @@ output "| Panel has been successfully installed. |"
 output "--------------------------------------------"
 output
 output
-output "Panel URL: ${HTTP_PROTOCOL}${PANEL_FQDN}"
+output "Panel URL: ${HTTP_PROTOCOL}${PHPMA_FQDN}"
 output
