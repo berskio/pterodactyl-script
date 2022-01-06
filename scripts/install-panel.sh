@@ -31,8 +31,13 @@ fi
 
 #region Install PHP
 output "Install PHP..."
-curl https://packages.sury.org/php/apt.gpg -o /etc/apt/trusted.gpg.d/php.gpg
-echo "deb https://packages.sury.org/php/ buster main" | tee /etc/apt/sources.list.d/php.list
+
+dist="$(. /etc/os-release && echo "$ID")"
+if [ "$dist" = "debian" ]; then
+    codename="$(. /etc/os-release && echo "$VERSION_CODENAME")"
+    curl https://packages.sury.org/php/apt.gpg -o /etc/apt/trusted.gpg.d/php.gpg
+    echo "deb https://packages.sury.org/php/ ${codename} main" | tee /etc/apt/sources.list.d/php.list
+fi
 
 apt update -y
 apt install -y php${PHP_VERSION} php${PHP_VERSION}-{cli,common,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip}
@@ -97,7 +102,7 @@ curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin
 #endregion
 
 #region Install and Setup Panel
-output "Install and setup panel..."
+output "Install and setup Panel..."
 
 mkdir -p /var/www/pterodactyl
 cd /var/www/pterodactyl
