@@ -131,7 +131,7 @@ get_latest_release() {
 
 PANEL_VERSION=$(get_latest_release "pterodactyl/panel")
 WINGS_VERSION=$(get_latest_release "pterodactyl/wings")
-PHPMA_VERSION=$(get_latest_release "phpmyadmin/phpmyadmin")
+PHPMA_VERSION=$(get_latest_release "phpmyadmin/phpmyadmin" | sed 's/[^0-9_]//g; /^[_]/ s/.//; s/_/./g')
 
 clear -x
 
@@ -139,8 +139,8 @@ while true; do
     output "Please select an option:"
     output
     output "[1] Install MariaDB"
-    output "[2] Install Panel (1.x)"
-    output "[3] Install Wings (1.x)"
+    output "[2] Install Panel"
+    output "[3] Install Wings"
     output "[4] Install phpMyAdmin"
     output
     output "[5] Update Panel to $PANEL_VERSION"
