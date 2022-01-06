@@ -93,7 +93,7 @@ output "Install and setup phpMyAdmin..."
 mkdir -p /var/www/phpmyadmin
 cd /var/www/phpmyadmin
 
-curl -o phpMyAdmin-latest-all-languages.tar.gz "https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz"
+curl -Lo phpMyAdmin-latest-all-languages.tar.gz "https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz"
 
 tar -xzvf phpMyAdmin-latest-all-languages.tar.gz
 mv /var/www/phpmyadmin/phpMyAdmin-latest-all-languages/* /var/www/phpmyadmin
