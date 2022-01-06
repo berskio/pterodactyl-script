@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="0.0.6"
+VERSION="0.0.7"
 
 #region User Variables
 PASSWORD_LENGTH=64
@@ -131,6 +131,7 @@ get_latest_release() {
 
 PANEL_VERSION=$(get_latest_release "pterodactyl/panel")
 WINGS_VERSION=$(get_latest_release "pterodactyl/wings")
+PHPMA_VERSION=$(get_latest_release "phpmyadmin/phpmyadmin")
 
 clear -x
 
@@ -138,12 +139,13 @@ while true; do
     output "Please select an option:"
     output
     output "[1] Install MariaDB"
-    output "[2] Install Panel (${PANEL_VERSION})"
-    output "[3] Install Wings (${WINGS_VERSION})"
+    output "[2] Install Panel (1.x)"
+    output "[3] Install Wings (1.x)"
     output "[4] Install phpMyAdmin"
     output
     output "[5] Update Panel to $PANEL_VERSION"
     output "[6] Update Wings to $WINGS_VERSION"
+    output "[7] Update phpMyAdmin to $PHPMA_VERSION"
     output
     output "[8] Change Settings"
     output "[9] Quit"
@@ -168,6 +170,9 @@ while true; do
         ;;
     6)
         . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/update-wings.sh")
+        ;;
+    7)
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/update-phpmyadmin.sh")
         ;;
     8)
         echo "Settings"
