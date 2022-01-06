@@ -13,6 +13,7 @@ SETUP_DBPANEL=true
 SETUP_DBHOST=true
 
 NGINX_SSL=true
+NGINX_HSTS=true
 
 DBPANEL_DB="panel"
 DBPANEL_USER="pterodactyl"

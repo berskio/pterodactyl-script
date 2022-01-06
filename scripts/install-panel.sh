@@ -171,6 +171,13 @@ fi
 
 if [ "$NGINX_SSL" = true ]; then
     curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/configs/nginx_ssl.conf"
+
+    if [ "$NGINX_HSTS" = true ]; then
+        PANEL_HSTS=
+    else
+        PANEL_HSTS=\#
+    fi
+    sed -i -e "s@<hsts>@${PANEL_HSTS}@g" /etc/nginx/sites-available/pterodactyl.conf
 else
     curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/configs/nginx.conf"
 fi

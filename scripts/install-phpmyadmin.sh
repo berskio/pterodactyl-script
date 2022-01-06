@@ -107,6 +107,13 @@ fi
 
 if [ "$NGINX_SSL" = true ]; then
     curl -o /etc/nginx/sites-available/phpmyadmin.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/configs/phpmyadmin_ssl.conf"
+
+    if [ "$NGINX_HSTS" = true ]; then
+        PHPMA_HSTS=
+    else
+        PHPMA_HSTS=\#
+    fi
+    sed -i -e "s@<hsts>@${PHPMA_HSTS}@g" /etc/nginx/sites-available/phpmyadmin.conf
 else
     curl -o /etc/nginx/sites-available/phpmyadmin.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/configs/phpmyadmin.conf"
 fi
