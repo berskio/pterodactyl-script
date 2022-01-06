@@ -84,7 +84,7 @@ fi
 #endregion
 
 output
-outout "Please enter the Host of MySQL (localhost): "
+output "Please enter the Host of MySQL (localhost): "
 read PHPMA_DBHOST
 
 #region Install and Setup phpMyAdmin
