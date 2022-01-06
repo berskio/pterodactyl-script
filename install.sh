@@ -145,7 +145,7 @@ while true; do
     output
     output "[5] Update Panel to $PANEL_VERSION"
     output "[6] Update Wings to $WINGS_VERSION"
-    output "[7] Update phpMyAdmin to $PHPMA_VERSION"
+    output "[7] Update phpMyAdmin to v${PHPMA_VERSION}"
     output
     output "[8] Change Settings"
     output "[9] Quit"
