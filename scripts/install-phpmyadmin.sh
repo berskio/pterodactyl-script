@@ -94,10 +94,7 @@ mkdir -p /var/www/phpmyadmin
 cd /var/www/phpmyadmin
 
 curl -Lo phpMyAdmin-latest-all-languages.tar.gz "https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz"
-
-tar -xzvf phpMyAdmin-latest-all-languages.tar.gz
-mv /var/www/phpmyadmin/phpMyAdmin-latest-all-languages/* /var/www/phpmyadmin
-rm -r /var/www/phpmyadmin/phpMyAdmin-latest-all-languages
+tar -xzvf phpMyAdmin-latest-all-languages.tar.gz --strip-components=1
 
 cp config.sample.inc.php config.inc.php
 chown -R www-data:www-data /var/www/phpmyadmin/*
