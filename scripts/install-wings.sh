@@ -81,7 +81,7 @@ mkdir -p /etc/pterodactyl
 curl -L -o /usr/local/bin/wings "https://github.com/pterodactyl/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
 chmod u+x /usr/local/bin/wings
 
-curl -o /etc/systemd/system/wings.service "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/configs/wings.service"
+curl -o /etc/systemd/system/wings.service "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/configs/wings.service"
 
 systemctl enable --now wings
 #endregion

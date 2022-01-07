@@ -65,7 +65,7 @@ if [ "$SETUP_LETSENCRYPT" = true ]; then
         rm /etc/nginx/sites-enabled/default
     fi
 
-    curl -o /etc/nginx/sites-available/phpmyadmin.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/configs/phpmyadmin.conf"
+    curl -o /etc/nginx/sites-available/phpmyadmin.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/configs/phpmyadmin.conf"
 
     sed -i -e "s@<domain>@${PHPMA_FQDN}@g" /etc/nginx/sites-available/phpmyadmin.conf
     sed -i -e "s@<php_version>@${PHP_VERSION}@g" /etc/nginx/sites-available/phpmyadmin.conf
@@ -106,7 +106,7 @@ if [ -f "/etc/nginx/sites-enabled/default" ]; then
 fi
 
 if [ "$NGINX_SSL" = true ]; then
-    curl -o /etc/nginx/sites-available/phpmyadmin.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/configs/phpmyadmin_ssl.conf"
+    curl -o /etc/nginx/sites-available/phpmyadmin.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/configs/phpmyadmin_ssl.conf"
 
     if [ "$NGINX_HSTS" = true ]; then
         PHPMA_HSTS=
@@ -115,7 +115,7 @@ if [ "$NGINX_SSL" = true ]; then
     fi
     sed -i -e "s@<hsts>@${PHPMA_HSTS}@g" /etc/nginx/sites-available/phpmyadmin.conf
 else
-    curl -o /etc/nginx/sites-available/phpmyadmin.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/configs/phpmyadmin.conf"
+    curl -o /etc/nginx/sites-available/phpmyadmin.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/configs/phpmyadmin.conf"
 fi
 
 sed -i -e "s@<domain>@${PHPMA_FQDN}@g" /etc/nginx/sites-available/phpmyadmin.conf

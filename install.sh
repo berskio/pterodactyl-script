@@ -112,7 +112,7 @@ SCRIPT_LOCATION="${BASH_SOURCE[@]}"
 ABS_SCRIPT_PATH=$(readlink -f "$SCRIPT_LOCATION")
 TMP_FILE=$(mktemp -p "" "XXXXX.sh")
 
-curl -s -L "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/install.sh" >"$TMP_FILE"
+curl -s -L "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/install.sh" >"$TMP_FILE"
 NEW_VER=$(grep "^VERSION" "$TMP_FILE" | awk -F'[="]' '{print $3}')
 
 if [[ "$VERSION" < "$NEW_VER" ]]; then
@@ -155,25 +155,25 @@ while true; do
 
     case $option in
     1)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-mariadb.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/install-mariadb.sh")
         ;;
     2)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-panel.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/install-panel.sh")
         ;;
     3)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-wings.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/install-wings.sh")
         ;;
     4)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/install-phpmyadmin.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/install-phpmyadmin.sh")
         ;;
     5)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/update-panel.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/update-panel.sh")
         ;;
     6)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/update-wings.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/update-wings.sh")
         ;;
     7)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/develop/scripts/update-phpmyadmin.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/update-phpmyadmin.sh")
         ;;
     8)
         echo "Settings"
