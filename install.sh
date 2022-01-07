@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="0.0.7"
+VERSION="0.1.0"
 
 #region User Variables
 PASSWORD_LENGTH=64
