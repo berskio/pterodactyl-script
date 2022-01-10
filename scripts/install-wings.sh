@@ -48,6 +48,8 @@ if [ "$SETUP_LETSENCRYPT" = true ]; then
             output "Please enter the email address for the SSL certificate: "
             read LE_EMAIL
 
+            ufw allow 80
+
             certbot certonly --webroot -w /var/www/pterodactyl/public --email "$LE_EMAIL" --agree-tos -d "$HOST_FQDN" --non-interactive
         fi
     else
@@ -58,6 +60,8 @@ if [ "$SETUP_LETSENCRYPT" = true ]; then
         output
         output "Please enter the email address for the SSL certificate: "
         read LE_EMAIL
+
+        ufw allow 80
 
         certbot certonly --standalone --email "$LE_EMAIL" --agree-tos -d "$HOST_FQDN" --non-interactive
     fi
