@@ -78,7 +78,7 @@ if [ "$SETUP_LETSENCRYPT" = true ]; then
         rm /etc/nginx/sites-enabled/default
     fi
 
-    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/configs/nginx.conf"
+    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/nginx.conf"
 
     sed -i -e "s@<domain>@${PANEL_FQDN}@g" /etc/nginx/sites-available/pterodactyl.conf
     sed -i -e "s@<php_version>@${PHP_VERSION}@g" /etc/nginx/sites-available/pterodactyl.conf
@@ -123,25 +123,30 @@ else
 fi
 
 php artisan p:environment:setup \
-    --url="${HTTP_PROTOCOL}${PANEL_FQDN}" \
-    --timezone="$(cat /etc/timezone)" \
-    --cache="file" \
-    --session="database" \
-    --queue="database" \
-    --settings-ui=true
+--url="${HTTP_PROTOCOL}${PANEL_FQDN}" \
+--timezone="$(cat /etc/timezone)" \
+--cache="file" \
+--session="database" \
+--queue="database" \
+--settings-ui=true
 
 if [ "$DB_INSTALLED" = true ]; then
     php artisan p:environment:database \
-        --host="127.0.0.1" \
-        --port="3306" \
-        --database="$DBPANEL_DB" \
-        --username="$DBPANEL_USER" \
-        --password="$DBPANEL_PASSWORD"
+    --host="127.0.0.1" \
+    --port="3306" \
+    --database="$DBPANEL_DB" \
+    --username="$DBPANEL_USER" \
+    --password="$DBPANEL_PASSWORD"
 else
     php artisan p:environment:database
 fi
 
-if [ "$SETUP_MAIL" = true ]; then
+output
+output
+output "Do you want to Set Up an Mail? (y/N): "
+read -r SETUP_MAIL
+
+if [[ "$SETUP_MAIL" =~ [Yy] ]]; then
     php artisan p:environment:mail
 fi
 
@@ -159,7 +164,7 @@ crontab -l | {
     echo "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1"
 } | crontab -
 
-curl -o /etc/systemd/system/pteroq.service "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/configs/pteroq.service"
+curl -o /etc/systemd/system/pteroq.service "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/pteroq.service"
 
 systemctl enable --now pteroq.service
 #endregion
@@ -170,7 +175,7 @@ if [ -f "/etc/nginx/sites-enabled/default" ]; then
 fi
 
 if [ "$NGINX_SSL" = true ]; then
-    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/configs/nginx_ssl.conf"
+    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/nginx_ssl.conf"
 
     if [ "$NGINX_HSTS" = true ]; then
         PANEL_HSTS=
@@ -179,7 +184,7 @@ if [ "$NGINX_SSL" = true ]; then
     fi
     sed -i -e "s@<hsts>@${PANEL_HSTS}@g" /etc/nginx/sites-available/pterodactyl.conf
 else
-    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/configs/nginx.conf"
+    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/nginx.conf"
 fi
 
 sed -i -e "s@<domain>@${PANEL_FQDN}@g" /etc/nginx/sites-available/pterodactyl.conf

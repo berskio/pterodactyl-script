@@ -1,33 +1,28 @@
 #!/bin/bash
 set -e
 
-VERSION="0.1.0"
+VERSION="0.1.1"
+PHP_VERSION=8.0
+DB_INSTALLED=false
 
 #region User Variables
-PASSWORD_LENGTH=64
+SETUP_FIREWALL=${SETUP_FIREWALL:-true}
+SETUP_LETSENCRYPT=${SETUP_LETSENCRYPT:-true}
 
-SETUP_FIREWALL=true
-SETUP_LETSENCRYPT=true
-SETUP_MAIL=false
-SETUP_DBPANEL=true
-SETUP_DBHOST=true
+NGINX_SSL=${NGINX_SSL:-true}
+NGINX_HSTS=${NGINX_HSTS:-true}
 
-NGINX_SSL=true
-NGINX_HSTS=true
+PASSWORD_LENGTH=${PASSWORD_LENGTH:-64}
 
-DBPANEL_DB="panel"
-DBPANEL_USER="pterodactyl"
-DBPANEL_PASSWORD=""
+DBPANEL_DB=${DBPANEL_DB:-"panel"}
+DBPANEL_USER=${DBPANEL_USER:-"pterodactyl"}
+DBPANEL_PASSWORD=${DBPANEL_PASSWORD:-""}
 
-DBHOST_USER="pterodactyluser"
-DBHOST_PASSWORD=""
+DBHOST_USER=${DBHOST_USER:-"pterodactyluser"}
+DBHOST_PASSWORD=${DBHOST_PASSWORD:""}
 
-DB_ROOT_PASSWORD=""
-
-PHP_VERSION=8.0
+DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD:""}
 #endregion
-
-DB_INSTALLED=false
 
 #region Text Formatting
 NC="\033[0m" # Normal Color
@@ -112,7 +107,7 @@ SCRIPT_LOCATION="${BASH_SOURCE[@]}"
 ABS_SCRIPT_PATH=$(readlink -f "$SCRIPT_LOCATION")
 TMP_FILE=$(mktemp -p "" "XXXXX.sh")
 
-curl -s -L "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/install.sh" >"$TMP_FILE"
+curl -s -L "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/install.sh" >"$TMP_FILE"
 NEW_VER=$(grep "^VERSION" "$TMP_FILE" | awk -F'[="]' '{print $3}')
 
 if [[ "$VERSION" < "$NEW_VER" ]]; then
@@ -148,37 +143,33 @@ while true; do
     output "[6] Update Wings to $WINGS_VERSION"
     output "[7] Update phpMyAdmin to v${PHPMA_VERSION}"
     output
-    output "[8] Change Settings"
-    output "[9] Quit"
+    output "[0] Quit"
 
     read -r option
 
     case $option in
     1)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/install-mariadb.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/scripts/install-mariadb.sh")
         ;;
     2)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/install-panel.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/scripts/install-panel.sh")
         ;;
     3)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/install-wings.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/scripts/install-wings.sh")
         ;;
     4)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/install-phpmyadmin.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/scripts/install-phpmyadmin.sh")
         ;;
     5)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/update-panel.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/scripts/update-panel.sh")
         ;;
     6)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/update-wings.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/scripts/update-wings.sh")
         ;;
     7)
-        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/Pterodactyl-Installer/master/scripts/update-phpmyadmin.sh")
+        . <(curl -s "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/scripts/update-phpmyadmin.sh")
         ;;
-    8)
-        echo "Settings"
-        ;;
-    9)
+    0)
         exit 0
         ;;
     *) ;;

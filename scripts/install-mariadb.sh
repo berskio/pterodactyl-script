@@ -39,7 +39,12 @@ if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok ins
     #endregion
 
     #region Setup Panel DB
-    if [ "$SETUP_DBPANEL" = true ]; then
+    output
+    output
+    output "Do you want to Create a Database and -User for the Panel? (Y/n): "
+    read -r SETUP_DBPANEL
+
+    if [[ ! "$SETUP_DBPANEL" =~ [Nn] ]]; then
         EXISTS_DBPANEL_USER=$(mysql -u root -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$DBPANEL_USER')")
         if [ "$EXISTS_DBPANEL_USER" = 0 ]; then
 
@@ -71,7 +76,12 @@ if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok ins
     #endregion
 
     #region Setup Host DB
-    if [ "$SETUP_DBHOST" = true ]; then
+    output
+    output
+    output "Do you want to Create a Database User for the Game Servers? (Y/n): "
+    read -r SETUP_DBHOST
+
+    if [[ ! "$SETUP_DBHOST" =~ [Nn] ]]; then
         EXISTS_DBHOST_USER=$(mysql -u root -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$DBHOST_USER')")
         if [ "$EXISTS_DBHOST_USER" = 0 ]; then
 
@@ -99,8 +109,8 @@ if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok ins
     output "--------------------------------------------"
     output
     output
-    
-    if [ "$SETUP_DBPANEL" = true ]; then
+
+    if [[ ! "$SETUP_DBPANEL" =~ [Nn] ]]; then
         output "--------------------------------------------"
         output "DB Panel Information (For Panel)"
         output "--------------------------------------------"
@@ -110,8 +120,8 @@ if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok ins
         output "Password: $DBPANEL_PASSWORD"
         output
     fi
-    
-    if [ "$SETUP_DBHOST" = true ]; then
+
+    if [[ ! "$SETUP_DBHOST" =~ [Nn] ]]; then
         output "--------------------------------------------"
         output "DB Host Information (For Per-Server Databases)"
         output "--------------------------------------------"
@@ -120,7 +130,7 @@ if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok ins
         output "Password: $DBHOST_PASSWORD"
         output
     fi
-    
+
     output "--------------------------------------------"
     output
     output "Root Password: $DB_ROOT_PASSWORD"
