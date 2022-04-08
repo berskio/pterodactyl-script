@@ -6,6 +6,9 @@
 
 ```bash
 curl https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/install.sh -O
+```
+
+```bash
 sudo bash install.sh
 ```
 
