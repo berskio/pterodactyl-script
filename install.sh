@@ -109,6 +109,9 @@ fi
 
 #region Get Latest Versions
 get_latest_release() {
+    # Install Curl if not installed
+    which curl &> /dev/null || apt install -y curl
+
     curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
         grep '"tag_name":' |                                          # Get tag line
         sed -E 's/.*"([^"]+)".*/\1/'                                  # Pluck JSON value
