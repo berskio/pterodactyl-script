@@ -57,7 +57,9 @@ DBHOST_SETUP=true
 DBHOST_USER="pterodactyluser"
 DBHOST_PASSWORD=""
 
+DB_SSL=true
 DB_ROOT_PASSWORD=""
+
 PASSWORD_LENGTH=64
 #endregion
 
@@ -102,7 +104,7 @@ fi
 #region Check Installation
 [[ -d /var/www/pterodactyl ]] && PANEL_INSTALLED=true || PANEL_INSTALLED=false
 [[ -x /usr/local/bin/wings ]] && WINGS_INSTALLED=true || WINGS_INSTALLED=false
-[[ -d /var/www/phpmyadmin ]] && PHPMA_INSTALLED=true || PHPMA_INSTALLED=false
+[[ -d /var/www/pterodactyl/public/phpmyadmin ]] && PHPMA_INSTALLED=true || PHPMA_INSTALLED=false
 #endregion
 
 #region Get Latest Versions
@@ -170,6 +172,17 @@ setup_mariadb() {
             #region Update Configuration
             output "Update MariaDB Configuration..."
             sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
+
+            if [ "$DB_SSL" = true ]; then
+                echo
+                info "Please enter the FQDN of the Database/Node (node.example.com): "
+                read -r fqdn
+
+                sed -i '/\[mysqld\]/a ssl-key=/etc/letsencrypt/live/'"${fqdn}"'/privkey.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
+                sed -i '/\[mysqld\]/a ssl-ca=/etc/letsencrypt/live/'"${fqdn}"'/chain.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
+                sed -i '/\[mysqld\]/a ssl-cert=/etc/letsencrypt/live/'"${fqdn}"'/cert.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
+            fi
+
             service mysql restart
             #endregion
         fi
@@ -227,6 +240,11 @@ q_mariadb_panel() {
 
     if [ "$DBPANEL_SETUP" = true ]; then
         echo
+        info "Activate SSL certificate for MySQL connection? (Y/n)"
+        read -r question_ssl
+        [[ ! "$question_ssl" =~ [Nn] ]] && DB_SSL=true || DB_SSL=false
+
+        echo
         info "Name of the panel database? (panel)"
         read -r question_db
         DBPANEL_DB=${question_db:-panel}
@@ -254,6 +272,11 @@ q_mariadb_host() {
     [[ ! "$question_setup" =~ [Nn] ]] && DBHOST_SETUP=true || DBHOST_SETUP=false
 
     if [ "$DBHOST_SETUP" = true ]; then
+        echo
+        info "Activate SSL certificate for MySQL connection? (Y/n)"
+        read -r question_ssl
+        [[ ! "$question_ssl" =~ [Nn] ]] && DB_SSL=true || DB_SSL=false
+
         echo
         info "Database username? (pterodactyluser)"
         read -r question_user
@@ -370,10 +393,10 @@ install_update_panel() {
 
             #region Install Certbot
             info "Install Certbot..."
-            apt-get install -y snapd
+            apt install -y snapd
             snap install core
             snap refresh core
-            apt-get remove -y certbot
+            apt remove -y certbot
             snap install --classic certbot
 
             if [ ! -L "/usr/bin/certbot" ]; then
@@ -549,10 +572,10 @@ install_update_wings() {
 
             #region Install Certbot
             info "Install Certbot..."
-            apt-get install -y snapd
+            apt install -y snapd
             snap install core
             snap refresh core
-            apt-get remove -y certbot
+            apt remove -y certbot
             snap install --classic certbot
 
             if [ ! -L "/usr/bin/certbot" ]; then
@@ -648,11 +671,11 @@ easy_menu() {
             echo
 
             output "${GREEN}1)${NC} Panel ${GREEN}($([ "$PANEL_INSTALLED" = true ] && echo Update || echo Install))"
-            output "   \e[3m${GRAY}+ MARIADB, NGINX[SSL+HSTS], SSL/TLS + UFW\e[0m"
+            output "   \e[3m${GRAY}+ MARIADB[SSL], NGINX[SSL+HSTS], SSL + UFW\e[0m"
             output "${BLUE}2)${NC} Wings ${BLUE}($([ "$WINGS_INSTALLED" = true ] && echo Update || echo Install))"
-            output "   \e[3m${GRAY}+ MARIADB, SSL/TLS + UFW\e[0m"
+            output "   \e[3m${GRAY}+ MARIADB[SSL], SSL + UFW\e[0m"
             output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}($([ "$PHPMA_INSTALLED" = true ] && echo Update || echo Install))"
-            output "   \e[3m${GRAY}+ NGINX[SSL+HSTS], SSL/TLS + UFW\e[0m"
+            output "   \e[3m${GRAY}+ SSL + UFW\e[0m"
 
             echo
             output "${CYAN}A)${NC} Advanced Mode"
@@ -731,8 +754,6 @@ advanced_menu() {
                 install_update_wings
                 ;;
             3)
-                q_nginx_ssl_hsts
-                q_firewall
                 update_upgrade
                 install_update_phpma
                 ;;

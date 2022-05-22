@@ -23,9 +23,9 @@ curl https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/instal
 
 | Operating System | Version | Architectures | Supported          |
 | ---------------- |---------| ------------- | ------------------ |
-| Ubuntu           | 16.04   | x86_64        | :x:                |
-|                  | 18.04   | x86_64        | :heavy_check_mark: |
+| Ubuntu           | 18.04   | x86_64        | :x:                |
 |                  | 20.04   | x86_64        | :heavy_check_mark: |
+|                  | 22.04   | x86_64        | :heavy_check_mark: |
 | Debian           | 9       | x86_64        | :x:                |
 |                  | 10      | x86_64        | :heavy_check_mark: |
 |                  | 11      | x86_64        | :heavy_check_mark: |
