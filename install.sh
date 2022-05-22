@@ -110,7 +110,7 @@ fi
 #region Get Latest Versions
 get_latest_release() {
     # Install Curl if not installed
-    which curl &> /dev/null || apt install -y curl
+    which curl &> /dev/null || apt-get install -y curl
 
     curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
         grep '"tag_name":' |                                          # Get tag line
@@ -126,13 +126,13 @@ PHPMA_VERSION=$(get_latest_release "phpmyadmin/phpmyadmin" | sed 's/[^0-9_]//g; 
 
 #region Update/Upgrade
 update_upgrade() {
-    apt update -y && apt upgrade -y
+    apt-get update -y && apt-get upgrade -y
 }
 #endregion
 
 #region Setup UFW
 setup_ufw() {
-    apt install -y ufw
+    apt-get install -y ufw
     ufw allow 22
     yes | ufw enable
 }
@@ -146,7 +146,7 @@ setup_mariadb() {
         #region Check if MariaDB Installed
         if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
             #region Install MariaDB
-            apt install -y mariadb-server
+            apt-get install -y mariadb-server
             #endregion
 
             #region Setup Firewall
@@ -360,7 +360,7 @@ install_update_panel() {
 
         #region Install Prerequisites
         info "Install Prerequisites..."
-        apt install -y software-properties-common apt-transport-https ca-certificates tar
+        apt-get install -y software-properties-common apt-transport-https ca-certificates tar
         #endregion
 
         #region Install PHP
@@ -373,13 +373,13 @@ install_update_panel() {
             echo "deb https://packages.sury.org/php/ ${codename} main" | tee /etc/apt/sources.list.d/php.list
         fi
 
-        apt update -y
-        apt install -y php${PHP_VERSION} php${PHP_VERSION}-{cli,common,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip}
+        apt-get update -y
+        apt-get install -y php${PHP_VERSION} php${PHP_VERSION}-{cli,common,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip}
         #endregion
 
         #region Install Nginx
         info "Install Nginx..."
-        apt install -y nginx
+        apt-get install -y nginx
         #endregion
 
         #region Panel FQDN
@@ -396,10 +396,10 @@ install_update_panel() {
 
             #region Install Certbot
             info "Install Certbot..."
-            apt install -y snapd
+            apt-get install -y snapd
             snap install core
             snap refresh core
-            apt remove -y certbot
+            apt-get remove -y certbot
             snap install --classic certbot
 
             if [ ! -L "/usr/bin/certbot" ]; then
@@ -575,10 +575,10 @@ install_update_wings() {
 
             #region Install Certbot
             info "Install Certbot..."
-            apt install -y snapd
+            apt-get install -y snapd
             snap install core
             snap refresh core
-            apt remove -y certbot
+            apt-get remove -y certbot
             snap install --classic certbot
 
             if [ ! -L "/usr/bin/certbot" ]; then
