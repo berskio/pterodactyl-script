@@ -5,7 +5,7 @@
 ## Installation
 
 ```bash
-curl https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/install.sh | sudo bash
+curl https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/install.sh | sudo bash
 ```
 
 ## Features
@@ -35,5 +35,5 @@ curl https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/instal
 **You can disable or customize specific services. To customize, you can run the script in advanced mode:**
 
 ```bash
-curl https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/install.sh | sudo bash advanced
+curl https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/install.sh | sudo bash advanced
 ```

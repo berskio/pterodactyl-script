@@ -413,7 +413,7 @@ install_update_panel() {
                 rm /etc/nginx/sites-enabled/default
             fi
 
-            curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/nginx.conf"
+            curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/nginx.conf"
 
             sed -i -e "s@<domain>@${panel_fqdn}@g" /etc/nginx/sites-available/pterodactyl.conf
             sed -i -e "s@<php_version>@${PHP_VERSION}@g" /etc/nginx/sites-available/pterodactyl.conf
@@ -499,7 +499,7 @@ install_update_panel() {
             echo "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1"
         } | crontab -
 
-        curl -o /etc/systemd/system/pteroq.service "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/pteroq.service"
+        curl -o /etc/systemd/system/pteroq.service "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/pteroq.service"
 
         systemctl enable --now pteroq.service
         #endregion
@@ -510,7 +510,7 @@ install_update_panel() {
         fi
 
         if [ "$NGINX_SSL" = true ]; then
-            curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/nginx_ssl.conf"
+            curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/nginx_ssl.conf"
 
             if [ "$NGINX_HSTS" = true ]; then
                 PANEL_HSTS=
@@ -519,7 +519,7 @@ install_update_panel() {
             fi
             sed -i -e "s@<hsts>@${PANEL_HSTS}@g" /etc/nginx/sites-available/pterodactyl.conf
         else
-            curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/nginx.conf"
+            curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/nginx.conf"
         fi
 
         sed -i -e "s@<domain>@${panel_fqdn}@g" /etc/nginx/sites-available/pterodactyl.conf
@@ -618,7 +618,7 @@ install_update_wings() {
         curl -L -o /usr/local/bin/wings "https://github.com/pterodactyl/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
         chmod u+x /usr/local/bin/wings
 
-        curl -o /etc/systemd/system/wings.service "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/wings.service"
+        curl -o /etc/systemd/system/wings.service "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/wings.service"
 
         systemctl enable --now wings
         #endregion
