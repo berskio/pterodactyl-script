@@ -78,7 +78,7 @@ if [ "$SETUP_LETSENCRYPT" = true ]; then
         rm /etc/nginx/sites-enabled/default
     fi
 
-    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/nginx.conf"
+    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/v0.1/configs/nginx.conf"
 
     sed -i -e "s@<domain>@${PANEL_FQDN}@g" /etc/nginx/sites-available/pterodactyl.conf
     sed -i -e "s@<php_version>@${PHP_VERSION}@g" /etc/nginx/sites-available/pterodactyl.conf
@@ -164,7 +164,7 @@ crontab -l | {
     echo "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1"
 } | crontab -
 
-curl -o /etc/systemd/system/pteroq.service "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/pteroq.service"
+curl -o /etc/systemd/system/pteroq.service "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/v0.1/configs/pteroq.service"
 
 systemctl enable --now pteroq.service
 #endregion
@@ -175,7 +175,7 @@ if [ -f "/etc/nginx/sites-enabled/default" ]; then
 fi
 
 if [ "$NGINX_SSL" = true ]; then
-    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/nginx_ssl.conf"
+    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/v0.1/configs/nginx_ssl.conf"
 
     if [ "$NGINX_HSTS" = true ]; then
         PANEL_HSTS=
@@ -184,7 +184,7 @@ if [ "$NGINX_SSL" = true ]; then
     fi
     sed -i -e "s@<hsts>@${PANEL_HSTS}@g" /etc/nginx/sites-available/pterodactyl.conf
 else
-    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/configs/nginx.conf"
+    curl -o /etc/nginx/sites-available/pterodactyl.conf "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/v0.1/configs/nginx.conf"
 fi
 
 sed -i -e "s@<domain>@${PANEL_FQDN}@g" /etc/nginx/sites-available/pterodactyl.conf

@@ -5,7 +5,7 @@
 ## Installation
 
 ```bash
-curl https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/master/install.sh -O
+curl https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/v0.1/install.sh -O
 ```
 
 ```bash
