@@ -110,7 +110,7 @@ fi
 #region Get Latest Versions
 get_latest_release() {
     # Install Curl if not installed
-    which curl &> /dev/null || apt-get install -y curl
+    which curl &>/dev/null || apt-get install -y curl
 
     curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
         grep '"tag_name":' |                                          # Get tag line
@@ -597,7 +597,6 @@ install_update_wings() {
             else
                 certbot certonly --standalone --email "$le_email" --agree-tos -d "$host_fqdn" --non-interactive
             fi
-            #endregion
         fi
         #endregion
 
@@ -664,122 +663,231 @@ install_update_phpma() {
 
 #endregion
 
+#region Setup Wizard
+setup_wizard() {
+    INSTALL_PANEL=
+    INSTALL_WINGS=
+    INSTALL_PHPMA=
+
+    echo
+    output "${YELLOW}* Pterodactyl Script v${VERSION} *"
+    output "https://github.com/BAERSERK/pterodactyl-script"
+
+    #region Panel Menu
+    while true; do
+        echo
+        output "${GREEN}Install Panel?"
+        output "   \e[3m${GRAY}+ MARIADB[SSL], NGINX[SSL+HSTS], SSL + UFW\e[0m"
+        echo -ne "Choose an option (Y/N): "
+
+        read -r option
+
+        case $option in
+        [Yy])
+            INSTALL_PANEL=true
+            break
+            ;;
+        [Nn])
+            INSTALL_PANEL=false
+            break
+            ;;
+        *) ;;
+        esac
+    done
+    #endregion
+
+    #region Wings Menu
+    while true; do
+        echo
+        output "${BLUE}Install Wings?"
+        output "   \e[3m${GRAY}+ MARIADB[SSL], SSL + UFW\e[0m"
+        echo -ne "Choose an option (Y/N): "
+
+        read -r option
+
+        case $option in
+        [Yy])
+            INSTALL_WINGS=true
+            break
+            ;;
+        [Nn])
+            INSTALL_WINGS=false
+            break
+            ;;
+        *) ;;
+        esac
+    done
+    #endregion
+
+    #region phpMyAdmin Menu
+    while true; do
+        echo
+        output "${PURPLE}Install phpMyAdmin?"
+        output "   \e[3m${GRAY}+ SSL + UFW\e[0m"
+        echo -ne "Choose an option (Y/N): "
+
+        read -r option
+
+        case $option in
+        [Yy])
+            INSTALL_PHPMA=true
+            break
+            ;;
+        [Nn])
+            INSTALL_PHPMA=false
+            break
+            ;;
+        *) ;;
+        esac
+    done
+    #endregion
+
+    #region Install selected
+    if [ "$INSTALL_PANEL" = true ]; then
+        update_upgrade
+        setup_mariadb
+        install_update_panel
+    fi
+
+    if [ "$INSTALL_WINGS" = true ]; then
+        update_upgrade
+        setup_mariadb
+        install_update_wings
+    fi
+
+    if [ "$INSTALL_PHPMA" = true ]; then
+        update_upgrade
+        install_update_phpma
+    fi
+    #endregion
+}
+#endregion
+
 #region Selection Menu
+
+#region Easy Mode
 easy_menu() {
-    if [ "$WINGS_INSTALLED" = true ] || [ "$PANEL_INSTALLED" = true ] || [ "$PHPMA_INSTALLED" = true ]; then
-        while true; do
+    echo
+    output "${YELLOW}* Pterodactyl Script v${VERSION} *"
+    output "https://github.com/BAERSERK/pterodactyl-script"
+
+    while true; do
+        echo
+        output "${GREEN}1)${NC} Panel ${GREEN}($([ "$PANEL_INSTALLED" = true ] && echo Update || echo Install))"
+        output "   \e[3m${GRAY}+ MARIADB[SSL], NGINX[SSL+HSTS], SSL + UFW\e[0m"
+        output "${BLUE}2)${NC} Wings ${BLUE}($([ "$WINGS_INSTALLED" = true ] && echo Update || echo Install))"
+        output "   \e[3m${GRAY}+ MARIADB[SSL], SSL + UFW\e[0m"
+        output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}($([ "$PHPMA_INSTALLED" = true ] && echo Update || echo Install))"
+        output "   \e[3m${GRAY}+ SSL + UFW\e[0m"
+
+        echo
+        output "${CYAN}A)${NC} Advanced Mode"
+        output "${RED}Q)${NC} Quit"
+        echo -ne "Choose an option: "
+
+        read -r option
+
+        case $option in
+        1)
+            update_upgrade
+            setup_mariadb
+            install_update_panel
+            ;;
+        2)
+            update_upgrade
+            setup_mariadb
+            install_update_wings
+            ;;
+        3)
+            update_upgrade
+            install_update_phpma
+            ;;
+        [Aa])
             echo
-            output "${YELLOW}* Pterodactyl Script v${VERSION} *"
-            output "https://github.com/BAERSERK/pterodactyl-script"
             echo
+            advanced_menu
+            exit 0
+            ;;
+        [Qq])
+            exit 0
+            ;;
+        *) ;;
+        esac
 
-            output "${GREEN}1)${NC} Panel ${GREEN}($([ "$PANEL_INSTALLED" = true ] && echo Update || echo Install))"
-            output "   \e[3m${GRAY}+ MARIADB[SSL], NGINX[SSL+HSTS], SSL + UFW\e[0m"
-            output "${BLUE}2)${NC} Wings ${BLUE}($([ "$WINGS_INSTALLED" = true ] && echo Update || echo Install))"
-            output "   \e[3m${GRAY}+ MARIADB[SSL], SSL + UFW\e[0m"
-            output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}($([ "$PHPMA_INSTALLED" = true ] && echo Update || echo Install))"
-            output "   \e[3m${GRAY}+ SSL + UFW\e[0m"
-
-            echo
-            output "${CYAN}A)${NC} Advanced Mode"
-            output "${RED}Q)${NC} Quit"
-            echo -ne "Choose an option: "
-
-            read -r option
-
-            case $option in
-            1)
-                update_upgrade
-                setup_mariadb
-                install_update_panel
-                ;;
-            2)
-                update_upgrade
-                setup_mariadb
-                install_update_wings
-                ;;
-            3)
-                update_upgrade
-                install_update_phpma
-                ;;
-            [Aa])
-                echo
-                echo
-                advanced_menu
-                exit 0
-                ;;
-            [Qq])
-                exit 0
-                ;;
-            *) ;;
-            esac
-
-            echo
-        done
-    fi
+        echo
+    done
 }
+#endregion
 
+#region Advanced Mode
 advanced_menu() {
-    if [ "$WINGS_INSTALLED" = true ] || [ "$PANEL_INSTALLED" = true ] || [ "$PHPMA_INSTALLED" = true ]; then
-        while true; do
+    echo
+    output "${YELLOW}* Pterodactyl Script v${VERSION} *"
+    output "https://github.com/BAERSERK/pterodactyl-script"
+
+    while true; do
+        echo
+
+        output "${GREEN}1)${NC} Panel ${GREEN}(Adv. $([ "$PANEL_INSTALLED" = true ] && echo Update || echo Install))"
+        output "${BLUE}2)${NC} Wings ${BLUE}(Adv. $([ "$WINGS_INSTALLED" = true ] && echo Update || echo Install))"
+        output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}(Adv. $([ "$PHPMA_INSTALLED" = true ] && echo Update || echo Install))"
+
+        echo
+        output "${CYAN}E)${NC} Easy Mode"
+        output "${RED}Q)${NC} Quit"
+        echo -ne "Choose an option: "
+
+        read -r option
+
+        case $option in
+        1)
+            q_mariadb_panel
+            q_nginx_ssl_hsts
+            q_letsencrypt
+            q_firewall
+            update_upgrade
+            setup_mariadb
+            install_update_panel
+            ;;
+        2)
+            q_mariadb_host
+            q_letsencrypt
+            q_firewall
+            update_upgrade
+            setup_mariadb
+            install_update_wings
+            ;;
+        3)
+            update_upgrade
+            install_update_phpma
+            ;;
+        [Ee])
             echo
-            output "${YELLOW}* Pterodactyl Script (Advanced) v${VERSION} *"
-            output "https://github.com/BAERSERK/pterodactyl-script"
             echo
+            easy_menu
+            exit 0
+            ;;
+        [Qq])
+            exit 0
+            ;;
+        *) ;;
+        esac
 
-            output "${GREEN}1)${NC} Panel ${GREEN}(Adv. $([ "$PANEL_INSTALLED" = true ] && echo Update || echo Install))"
-            output "${BLUE}2)${NC} Wings ${BLUE}(Adv. $([ "$WINGS_INSTALLED" = true ] && echo Update || echo Install))"
-            output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}(Adv. $([ "$PHPMA_INSTALLED" = true ] && echo Update || echo Install))"
-
-            echo
-            output "${CYAN}E)${NC} Easy Mode"
-            output "${RED}Q)${NC} Quit"
-            echo -ne "Choose an option: "
-
-            read -r option
-
-            case $option in
-            1)
-                q_mariadb_panel
-                q_nginx_ssl_hsts
-                q_letsencrypt
-                q_firewall
-                update_upgrade
-                setup_mariadb
-                install_update_panel
-                ;;
-            2)
-                q_mariadb_host
-                q_letsencrypt
-                q_firewall
-                update_upgrade
-                setup_mariadb
-                install_update_wings
-                ;;
-            3)
-                update_upgrade
-                install_update_phpma
-                ;;
-            [Ee])
-                echo
-                echo
-                easy_menu
-                exit 0
-                ;;
-            [Qq])
-                exit 0
-                ;;
-            *) ;;
-            esac
-
-            echo
-        done
-    fi
+        echo
+    done
 }
+#endregion
 
-if [[ $1 == a* ]]; then
-    advanced_menu
+#region Select correct mode
+if [ "$WINGS_INSTALLED" = true ] || [ "$PANEL_INSTALLED" = true ] || [ "$PHPMA_INSTALLED" = true ]; then
+    if [[ $1 == a* ]]; then
+        advanced_menu
+    else
+        easy_menu
+    fi
 else
-    easy_menu
+    setup_wizard
 fi
+#endregion
+
 #endregion
