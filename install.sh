@@ -19,6 +19,7 @@ output() {
 }
 
 info() {
+    echo
     echo -e "${CYAN}${1}${NC}"
 }
 
