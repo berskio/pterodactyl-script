@@ -65,6 +65,8 @@ HOST_FQDN=""
 PASSWORD_LENGTH=64
 #endregion
 
+#region Check requirements
+#
 #region Check if Root
 if [ "$EUID" -ne 0 ]; then
     error "Must run the script with root privileges!"
@@ -102,9 +104,11 @@ if [ "$virt" = "openvz" ] || [ "$virt" = "lxc" ]; then
     fi
 fi
 #endregion
+#
+#endregion
 
 #region Helper Functions
-
+#
 #region Update/Upgrade
 update_upgrade() {
     apt-get update -y && apt-get upgrade -y
@@ -126,23 +130,20 @@ setup_mariadb() {
 
         #Check if MariaDB Installed
         if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
-            #region Install MariaDB
+            #Install MariaDB
             apt-get install -y mariadb-server
-            #endregion
 
-            #region Setup Firewall
+            #Setup Firewall
             if [ "$SETUP_FIREWALL" = true ]; then
                 output "Setup Firewall..."
                 setup_ufw
                 ufw allow 3306
             fi
-            #endregion
 
-            #region Generate Root Password
+            #Generate Root Password
             DB_ROOT_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
-            #endregion
 
-            #region Secure MySQL
+            #Secure MySQL
             info "Setup secure MySQL installation..."
             C0="UPDATE mysql.global_priv SET priv=json_set(priv, '$.plugin', 'mysql_native_password', '$.authentication_string', PASSWORD('$DB_ROOT_PASSWORD')) WHERE User='root';"
             C1="DELETE FROM mysql.global_priv WHERE User='';"
@@ -151,15 +152,14 @@ setup_mariadb() {
             C4="DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
             C5="FLUSH PRIVILEGES;"
             mysql -u root -e "${C0}${C1}${C2}${C3}${C4}${C5}"
-            #endregion
 
-            #region Update Configuration
+            #Update Configuration
             info "Update MariaDB Configuration..."
             sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
 
             if [ "$DB_SSL" = true ]; then
 
-                #region Ask for FQDN if not already set
+                #Ask for FQDN if not already set
                 if [ -z "$HOST_FQDN" ]; then
                     echo
                     info "Please enter the FQDN of the Database/Node (node.example.com): "
@@ -167,7 +167,6 @@ setup_mariadb() {
 
                     HOST_FQDN=$fqdn
                 fi
-                #endregion
 
                 sed -i '/\[mysqld\]/a ssl-key=/etc/letsencrypt/live/'"${HOST_FQDN}"'/privkey.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
                 sed -i '/\[mysqld\]/a ssl-ca=/etc/letsencrypt/live/'"${HOST_FQDN}"'/chain.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
@@ -175,7 +174,6 @@ setup_mariadb() {
             fi
 
             service mysql restart
-            #endregion
         fi
     fi
 }
@@ -184,11 +182,10 @@ setup_mariadb() {
 #region Setup Panel Database
 setup_panel_db() {
     if [ "$DBPANEL_SETUP" = true ]; then
-        #region Generate Password if empty
+        #Generate Password if empty
         if [ -z "$DBPANEL_PASSWORD" ]; then
             DBPANEL_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
         fi
-        #endregion
 
         C0="CREATE USER '$DBPANEL_USER'@'127.0.0.1' IDENTIFIED BY '$DBPANEL_PASSWORD';"
         C1="CREATE DATABASE $DBPANEL_DB;"
@@ -203,11 +200,10 @@ setup_panel_db() {
 #region Setup Host Database
 setup_host_db() {
     if [ "$DBHOST_SETUP" = true ]; then
-        #region Generate Password if empty
+        #Generate Password if empty
         if [ -z "$DBHOST_PASSWORD" ]; then
             DBHOST_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
         fi
-        #endregion
 
         output "Create $DBHOST_USER user..."
         C0="CREATE USER '$DBHOST_USER'@'%' IDENTIFIED BY '$DBHOST_PASSWORD';"
@@ -233,11 +229,11 @@ print_db_info() {
     fi
 }
 #endregion
-
+#
 #endregion
 
 #region Questions
-
+#
 #region MariaDB Panel
 q_mariadb_panel() {
     echo
@@ -317,7 +313,7 @@ q_nginx_ssl_hsts() {
 }
 #endregion
 
-#region LETS ENCRYPT
+#region Let's Encrypt
 q_letsencrypt() {
     echo
     info "Generate Let's Encrypt SSL Certificate? (Y/n)"
@@ -334,13 +330,12 @@ q_firewall() {
     [[ ! "$question" =~ [Nn] ]] && SETUP_FIREWALL=true || SETUP_FIREWALL=false
 }
 #endregion
-
+#
 #endregion
 
 #region Install or Update
-
-#region Install/Update Panel
 install_update_panel() {
+    #region Update Panel
     if [ -d /var/www/pterodactyl ]; then
         info "Update Panel..."
 
@@ -350,26 +345,25 @@ install_update_panel() {
         --no-interaction
 
         success "Panel has been successfully updated."
+        #endregion
     else
+        #region Install Panel
         info "Install Panel..."
 
-        #region Setup Firewall
+        #Setup Firewall
         if [ "$SETUP_FIREWALL" = true ]; then
             info "Setup Firewall..."
             setup_ufw
             ufw allow 80
             ufw allow 443
         fi
-        #endregion
 
-        #region Install Prerequisites
+        #Install Prerequisites
         info "Install Prerequisites..."
         apt-get install -y software-properties-common apt-transport-https ca-certificates tar
-        #endregion
 
-        #region Install PHP
+        #Install PHP
         info "Install PHP..."
-
         dist="$(. /etc/os-release && echo "$ID")"
         if [ "$dist" = "debian" ]; then
             codename="$(. /etc/os-release && echo "$VERSION_CODENAME")"
@@ -379,26 +373,23 @@ install_update_panel() {
 
         apt-get update -y
         apt-get install -y php${PHP_VERSION} php${PHP_VERSION}-{cli,common,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip}
-        #endregion
 
-        #region Install Nginx
+        #Install Nginx
         info "Install Nginx..."
         apt-get install -y nginx
-        #endregion
 
-        #region Panel FQDN
+        #Ask for Panel FQDN
         echo
         info "Please enter the FQDN of the Panel (panel.example.com): "
         read -r panel_fqdn
-        #endregion
 
-        #region Setup Let’s Encrypt
+        #Setup Let’s Encrypt
         if [ "$SETUP_LETSENCRYPT" = true ]; then
             echo
             info "Please enter the email address for the SSL certificate: "
             read -r le_email
 
-            #region Install Certbot
+            #Install Certbot
             info "Install Certbot..."
             apt-get install -y snapd
             snap install core
@@ -409,9 +400,8 @@ install_update_panel() {
             if [ ! -L "/usr/bin/certbot" ]; then
                 ln -s /snap/bin/certbot /usr/bin/certbot
             fi
-            #endregion
 
-            #region Setup Webserver without SSL
+            #Setup Webserver without SSL
             if [ -f "/etc/nginx/sites-enabled/default" ]; then
                 rm /etc/nginx/sites-enabled/default
             fi
@@ -430,16 +420,13 @@ install_update_panel() {
             mkdir -p /var/www/pterodactyl/public
 
             certbot certonly --webroot -w /var/www/pterodactyl/public --email "$le_email" --agree-tos -d "$panel_fqdn" --non-interactive
-            #endregion
         fi
-        #endregion
 
-        #region Install Composer
+        #Install Composer
         info "Install Composer..."
         curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-        #endregion
 
-        #region Install and Setup Panel
+        #Install and Setup Panel
         info "Install and setup Panel..."
 
         mkdir -p /var/www/pterodactyl
@@ -494,7 +481,7 @@ install_update_panel() {
 
         chown -R www-data:www-data /var/www/pterodactyl/*
 
-        #region Setup Queue Listeners
+        #Setup Queue Listeners
         info "Setup Queue Listeners..."
 
         crontab -l | {
@@ -505,9 +492,8 @@ install_update_panel() {
         curl -o /etc/systemd/system/pteroq.service "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/pteroq.service"
 
         systemctl enable --now pteroq.service
-        #endregion
 
-        #region Setup Webserver
+        #Setup Webserver
         if [ -f "/etc/nginx/sites-enabled/default" ]; then
             rm /etc/nginx/sites-enabled/default
         fi
@@ -533,18 +519,15 @@ install_update_panel() {
         fi
 
         systemctl restart nginx
-        #endregion
-
-        #endregion
 
         success "Panel has been successfully installed.\n-> URL: ${PANEL_PROTOCOL}${panel_fqdn}"
+        #endregion
     fi
 }
-#endregion
 
-#region Install/Update Wings
 install_update_wings() {
     if [ -x /usr/local/bin/wings ]; then
+        #region Update Wings
         info "Update Wings..."
 
         curl -L -o /usr/local/bin/wings "https://github.com/pterodactyl/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
@@ -553,19 +536,20 @@ install_update_wings() {
         systemctl restart wings
 
         success "Wings has been successfully updated."
+        #endregion
     else
+        #region Install Wings
         info "Install Wings..."
 
-        #region Setup Firewall
+        #Setup Firewall
         if [ "$SETUP_FIREWALL" = true ]; then
             info "Setup Firewall..."
             setup_ufw
             ufw allow 8080
             ufw allow 2022
         fi
-        #endregion
 
-        #region Ask for FQDN if not already set
+        #Ask for FQDN if not already set
         if [ -z "$HOST_FQDN" ]; then
             echo
             info "Please enter the FQDN of the Node (node.example.com): "
@@ -573,15 +557,14 @@ install_update_wings() {
 
             HOST_FQDN=$fqdn
         fi
-        #endregion
 
-        #region Setup Let’s Encrypt
+        #Setup Let’s Encrypt
         if [ "$SETUP_LETSENCRYPT" = true ]; then
             echo
             info "Please enter the email address for the SSL certificate: "
             read -r le_email
 
-            #region Install Certbot
+            #Install Certbot
             info "Install Certbot..."
             apt-get install -y snapd
             snap install core
@@ -592,7 +575,6 @@ install_update_wings() {
             if [ ! -L "/usr/bin/certbot" ]; then
                 ln -s /snap/bin/certbot /usr/bin/certbot
             fi
-            #endregion
 
             ufw allow 80
 
@@ -606,20 +588,17 @@ install_update_wings() {
                 certbot certonly --standalone --email "$le_email" --agree-tos -d "$HOST_FQDN" --non-interactive
             fi
         fi
-        #endregion
 
-        #region Install Docker
+        #Install Docker
         info "Install Docker..."
         curl -sSL https://get.docker.com/ | CHANNEL=stable bash
-        #endregion
 
-        #region Enable SWAP
+        #Enable SWAP
         info "Enable SWAP for Docker"
         sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& swapaccount=1/' /etc/default/grub
         update-grub
-        #endregion
 
-        #region Install Wings
+        #Install Wings
         info "Install Wings..."
         mkdir -p /etc/pterodactyl
         curl -L -o /usr/local/bin/wings "https://github.com/pterodactyl/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
@@ -628,17 +607,18 @@ install_update_wings() {
         curl -o /etc/systemd/system/wings.service "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/wings.service"
 
         systemctl enable --now wings
-        #endregion
 
         success "Wings has been successfully installed.\n-> Restart your system and add this node to the panel!"
+        #endregion
     fi
 }
-#endregion
 
-#region Install/Update phpMyAdmin
 install_update_phpma() {
+    #Check if Panel installed
     if [ -d /var/www/pterodactyl ]; then
+
         if [ -d /var/www/pterodactyl/public/phpmyadmin ]; then
+            #region Update phpMyAdmin
             info "Update phpMyAdmin..."
 
             cd /var/www/pterodactyl/public/phpmyadmin
@@ -649,7 +629,9 @@ install_update_phpma() {
             chown -R www-data:www-data /var/www/pterodactyl/*
 
             success "phpMyAdmin has been successfully updated."
+            #endregion
         else
+            #region Install phpMyAdmin
             info "Install phpMyAdmin..."
 
             mkdir -p /var/www/pterodactyl/public/phpmyadmin
@@ -658,7 +640,7 @@ install_update_phpma() {
             curl -Lo phpMyAdmin-latest-all-languages.tar.gz "https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz"
             tar -xzvf phpMyAdmin-latest-all-languages.tar.gz --strip-components=1
 
-            #region Ask for FQDN if not already set
+            #Ask for FQDN if not already set
             if [ -z "$HOST_FQDN" ]; then
                 echo
                 info "Please enter the FQDN of the Database/Node (node.example.com): "
@@ -666,24 +648,21 @@ install_update_phpma() {
 
                 HOST_FQDN=$fqdn
             fi
-            #endregion
 
-            #region Change Config
+            #Change Config
             curl -o config.inc.php "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/phpmyadmin.php"
             sed -i -e "s@<fqdn>@${HOST_FQDN}@g" config.inc.php
             sed -i -e "s@<blowfish>@$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w 32 | head -n 1)@g" config.inc.php
-            #endregion
 
             chown -R www-data:www-data /var/www/pterodactyl/*
 
             success "phpMyAdmin has been successfully installed.\n-> URL: http://<panel_url>/phpmyadmin"
+            #endregion
         fi
     else
         error "To install phpMyAdmin you need to install the Panel first!"
     fi
 }
-#endregion
-
 #endregion
 
 #region Setup Wizard
@@ -791,7 +770,7 @@ setup_wizard() {
 #endregion
 
 #region Selection Menu
-
+#
 #region Easy Mode
 easy_menu() {
     echo
@@ -876,6 +855,7 @@ advanced_menu() {
             q_nginx_ssl_hsts
             q_letsencrypt
             q_firewall
+
             update_upgrade
             setup_mariadb
             setup_panel_db
@@ -886,6 +866,7 @@ advanced_menu() {
             q_mariadb_host
             q_letsencrypt
             q_firewall
+
             update_upgrade
             setup_mariadb
             setup_host_db
@@ -928,5 +909,5 @@ else
     fi
 fi
 #endregion
-
+#
 #endregion
