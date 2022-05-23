@@ -61,6 +61,7 @@ DBHOST_PASSWORD=""
 DB_SSL=true
 DB_ROOT_PASSWORD=""
 
+HOST_FQDN=""
 PASSWORD_LENGTH=64
 #endregion
 
@@ -172,13 +173,20 @@ setup_mariadb() {
             sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
 
             if [ "$DB_SSL" = true ]; then
-                echo
-                info "Please enter the FQDN of the Database/Node (node.example.com): "
-                read -r fqdn
 
-                sed -i '/\[mysqld\]/a ssl-key=/etc/letsencrypt/live/'"${fqdn}"'/privkey.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
-                sed -i '/\[mysqld\]/a ssl-ca=/etc/letsencrypt/live/'"${fqdn}"'/chain.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
-                sed -i '/\[mysqld\]/a ssl-cert=/etc/letsencrypt/live/'"${fqdn}"'/cert.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
+                #region Ask for FQDN if not already set
+                if [ -z "$HOST_FQDN" ]; then
+                    echo
+                    info "Please enter the FQDN of the Database/Node (node.example.com): "
+                    read -r fqdn
+
+                    HOST_FQDN=$fqdn
+                fi
+                #endregion
+
+                sed -i '/\[mysqld\]/a ssl-key=/etc/letsencrypt/live/'"${HOST_FQDN}"'/privkey.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
+                sed -i '/\[mysqld\]/a ssl-ca=/etc/letsencrypt/live/'"${HOST_FQDN}"'/chain.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
+                sed -i '/\[mysqld\]/a ssl-cert=/etc/letsencrypt/live/'"${HOST_FQDN}"'/cert.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
             fi
 
             service mysql restart
@@ -556,10 +564,14 @@ install_update_wings() {
         fi
         #endregion
 
-        #region Host FQDN
-        echo
-        info "Please enter the FQDN of the Node (node.example.com): "
-        read -r host_fqdn
+        #region Ask for FQDN if not already set
+        if [ -z "$HOST_FQDN" ]; then
+            echo
+            info "Please enter the FQDN of the Node (node.example.com): "
+            read -r fqdn
+
+            HOST_FQDN=$fqdn
+        fi
         #endregion
 
         #region Setup Let’s Encrypt
@@ -588,9 +600,9 @@ install_update_wings() {
 
             read -r panel_machine
             if [[ ! "$panel_machine" =~ [Nn] ]]; then
-                certbot certonly --webroot -w /var/www/pterodactyl/public --email "$le_email" --agree-tos -d "$host_fqdn" --non-interactive
+                certbot certonly --webroot -w /var/www/pterodactyl/public --email "$le_email" --agree-tos -d "$HOST_FQDN" --non-interactive
             else
-                certbot certonly --standalone --email "$le_email" --agree-tos -d "$host_fqdn" --non-interactive
+                certbot certonly --standalone --email "$le_email" --agree-tos -d "$HOST_FQDN" --non-interactive
             fi
         fi
         #endregion
@@ -645,7 +657,22 @@ install_update_phpma() {
             curl -Lo phpMyAdmin-latest-all-languages.tar.gz "https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz"
             tar -xzvf phpMyAdmin-latest-all-languages.tar.gz --strip-components=1
 
-            cp config.sample.inc.php config.inc.php
+            #region Ask for FQDN if not already set
+            if [ -z "$HOST_FQDN" ]; then
+                echo
+                info "Please enter the FQDN of the Database/Node (node.example.com): "
+                read -r fqdn
+
+                HOST_FQDN=$fqdn
+            fi
+            #endregion
+
+            #region Change Config
+            curl -o config.inc.php "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/phpmyadmin.php"
+            sed -i -e "s@<fqdn>@${HOST_FQDN}@g" config.inc.php
+            sed -i -e "s@<blowfish>@$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w 32 | head -n 1)@g" config.inc.php
+            #endregion
+
             chown -R www-data:www-data /var/www/pterodactyl/*
 
             success "phpMyAdmin has been successfully installed.\n-> URL: http://<panel_url>/phpmyadmin"
