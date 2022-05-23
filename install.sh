@@ -780,11 +780,11 @@ easy_menu() {
     while true; do
         echo
         output "${GREEN}1)${NC} Panel ${GREEN}($([[ -d /var/www/pterodactyl ]] && echo Update || echo Install))"
-        output "   \e[3m${GRAY}+ MARIADB[SSL], NGINX[SSL+HSTS], SSL + UFW\e[0m"
+        [[ -d /var/www/pterodactyl ]] && output "   \e[3m${GRAY}+ MARIADB[SSL], NGINX[SSL+HSTS], SSL + UFW\e[0m"
         output "${BLUE}2)${NC} Wings ${BLUE}($([[ -x /usr/local/bin/wings ]] && echo Update || echo Install))"
-        output "   \e[3m${GRAY}+ MARIADB[SSL], SSL + UFW\e[0m"
+        [[ -x /usr/local/bin/wings ]] && output "   \e[3m${GRAY}+ MARIADB[SSL], SSL + UFW\e[0m"
         output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}($([[ -d /var/www/pterodactyl/public/phpmyadmin ]] && echo Update || echo Install))"
-        output "   \e[3m${GRAY}+ SSL + UFW\e[0m"
+        [[ -d /var/www/pterodactyl/public/phpmyadmin ]] && output "   \e[3m${GRAY}+ SSL + UFW\e[0m"
 
         echo
         output "${CYAN}A)${NC} Advanced Mode"
