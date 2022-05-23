@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="0.1.1"
+VERSION="0.1.2"
 PHP_VERSION=8.0
 DB_INSTALLED=false
 
