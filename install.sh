@@ -656,7 +656,7 @@ install_update_phpma() {
 
             chown -R www-data:www-data /var/www/pterodactyl/*
 
-            success "phpMyAdmin has been successfully installed.\n-> URL: http://<panel_url>/phpmyadmin"
+            success "phpMyAdmin has been successfully installed.\n-> URL: http://panel.example.com/phpmyadmin"
             #endregion
         fi
     else
