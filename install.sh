@@ -144,7 +144,7 @@ setup_mariadb() {
     if [ "$DBPANEL_SETUP" = true ] || [ "$DBHOST_SETUP" = true ]; then
         info "Install MariaDB..."
 
-        #region Check if MariaDB Installed
+        #Check if MariaDB Installed
         if [ $(dpkg-query -W -f='${Status}' mariadb-server 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
             #region Install MariaDB
             apt-get install -y mariadb-server
@@ -163,7 +163,7 @@ setup_mariadb() {
             #endregion
 
             #region Secure MySQL
-            output "Setup secure MySQL installation..."
+            info "Setup secure MySQL installation..."
             C0="UPDATE mysql.global_priv SET priv=json_set(priv, '$.plugin', 'mysql_native_password', '$.authentication_string', PASSWORD('$DB_ROOT_PASSWORD')) WHERE User='root';"
             C1="DELETE FROM mysql.global_priv WHERE User='';"
             C2="DELETE FROM mysql.global_priv WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
@@ -174,7 +174,7 @@ setup_mariadb() {
             #endregion
 
             #region Update Configuration
-            output "Update MariaDB Configuration..."
+            info "Update MariaDB Configuration..."
             sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
 
             if [ "$DB_SSL" = true ]; then
@@ -190,43 +190,43 @@ setup_mariadb() {
             service mysql restart
             #endregion
         fi
-        #endregion
+    fi
+}
+#endregion
 
-        #region Setup Panel Database
-        if [ "$DBPANEL_SETUP" = true ]; then
-            #region Generate Password if empty
-            if [ -z "$DBPANEL_PASSWORD" ]; then
-                DBPANEL_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
-            fi
-            #endregion
-
-            output "Create $DBPANEL_USER user..."
-            C0="CREATE USER '$DBPANEL_USER'@'127.0.0.1' IDENTIFIED BY '$DBPANEL_PASSWORD';"
-
-            output "Create $DBPANEL_DB database..."
-            C1="CREATE DATABASE $DBPANEL_DB;"
-
-            C2="GRANT ALL PRIVILEGES ON ${DBPANEL_DB}.* TO '$DBPANEL_USER'@'127.0.0.1' WITH GRANT OPTION;"
-            C3="FLUSH PRIVILEGES;"
-            mysql -u root -e "${C0}${C1}${C2}${C3}"
+#region Setup Panel Database
+setup_panel_db() {
+    if [ "$DBPANEL_SETUP" = true ]; then
+        #region Generate Password if empty
+        if [ -z "$DBPANEL_PASSWORD" ]; then
+            DBPANEL_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
         fi
         #endregion
 
-        #region Setup Host Database
-        if [ "$DBHOST_SETUP" = true ]; then
-            #region Generate Password if empty
-            if [ -z "$DBHOST_PASSWORD" ]; then
-                DBHOST_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
-            fi
-            #endregion
+        C0="CREATE USER '$DBPANEL_USER'@'127.0.0.1' IDENTIFIED BY '$DBPANEL_PASSWORD';"
+        C1="CREATE DATABASE $DBPANEL_DB;"
 
-            output "Create $DBHOST_USER user..."
-            C0="CREATE USER '$DBHOST_USER'@'%' IDENTIFIED BY '$DBHOST_PASSWORD';"
+        C2="GRANT ALL PRIVILEGES ON ${DBPANEL_DB}.* TO '$DBPANEL_USER'@'127.0.0.1' WITH GRANT OPTION;"
+        C3="FLUSH PRIVILEGES;"
+        mysql -u root -e "${C0}${C1}${C2}${C3}"
+    fi
+}
+#endregion
 
-            C1="GRANT ALL PRIVILEGES ON *.* TO '$DBHOST_USER'@'%' WITH GRANT OPTION;"
-            mysql -u root -e "${C0}${C1}"
+#region Setup Host Database
+setup_host_db() {
+    if [ "$DBHOST_SETUP" = true ]; then
+        #region Generate Password if empty
+        if [ -z "$DBHOST_PASSWORD" ]; then
+            DBHOST_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
         fi
         #endregion
+
+        output "Create $DBHOST_USER user..."
+        C0="CREATE USER '$DBHOST_USER'@'%' IDENTIFIED BY '$DBHOST_PASSWORD';"
+
+        C1="GRANT ALL PRIVILEGES ON *.* TO '$DBHOST_USER'@'%' WITH GRANT OPTION;"
+        mysql -u root -e "${C0}${C1}"
     fi
 }
 #endregion
@@ -534,7 +534,7 @@ install_update_panel() {
 
         #endregion
 
-        success "Panel has been successfully installed.\n-> URL: ${HTTP_PROTOCOL}${panel_fqdn}"
+        success "Panel has been successfully installed.\n-> URL: ${PANEL_PROTOCOL}${panel_fqdn}"
     fi
 }
 #endregion
@@ -747,12 +747,14 @@ setup_wizard() {
     if [ "$INSTALL_PANEL" = true ]; then
         update_upgrade
         setup_mariadb
+        setup_panel_db
         install_update_panel
     fi
 
     if [ "$INSTALL_WINGS" = true ]; then
         update_upgrade
         setup_mariadb
+        setup_host_db
         install_update_wings
     fi
 
@@ -792,11 +794,13 @@ easy_menu() {
         1)
             update_upgrade
             setup_mariadb
+            setup_panel_db
             install_update_panel
             ;;
         2)
             update_upgrade
             setup_mariadb
+            setup_host_db
             install_update_wings
             ;;
         3)
@@ -848,6 +852,7 @@ advanced_menu() {
             q_firewall
             update_upgrade
             setup_mariadb
+            setup_panel_db
             install_update_panel
             ;;
         2)
@@ -856,6 +861,7 @@ advanced_menu() {
             q_firewall
             update_upgrade
             setup_mariadb
+            setup_host_db
             install_update_wings
             ;;
         3)
