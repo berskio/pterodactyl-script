@@ -103,21 +103,6 @@ if [ "$virt" = "openvz" ] || [ "$virt" = "lxc" ]; then
 fi
 #endregion
 
-#region Get Latest Versions
-get_latest_release() {
-    # Install Curl if not installed
-    which curl &>/dev/null || apt-get install -y curl
-
-    curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
-        grep '"tag_name":' |                                          # Get tag line
-        sed -E 's/.*"([^"]+)".*/\1/'                                  # Pluck JSON value
-}
-
-PANEL_VERSION=$(get_latest_release "pterodactyl/panel")
-WINGS_VERSION=$(get_latest_release "pterodactyl/wings")
-PHPMA_VERSION=$(get_latest_release "phpmyadmin/phpmyadmin" | sed 's/[^0-9_]//g; /^[_]/ s/.//; s/_/./g')
-#endregion
-
 #region Helper Functions
 
 #region Update/Upgrade
@@ -229,6 +214,22 @@ setup_host_db() {
 
         C1="GRANT ALL PRIVILEGES ON *.* TO '$DBHOST_USER'@'%' WITH GRANT OPTION;"
         mysql -u root -e "${C0}${C1}"
+    fi
+}
+#endregion
+
+#region Print DB Info
+print_db_info() {
+    if [ "$DBPANEL_SETUP" = true ] || [ "$DBHOST_SETUP" = true ]; then
+        success "MariaDB has been successfully installed."
+    fi
+
+    if [ "$DBPANEL_SETUP" = true ]; then
+        success "Panel\n-> Database: ${DBPANEL_DB}\n-> User: ${DBPANEL_USER}\n-> Password: ${DBPANEL_PASSWORD}"
+    fi
+
+    if [ "$DBHOST_SETUP" = true ]; then
+        success "Servers\n-> User: ${DBHOST_USER}\n-> Password: ${DBHOST_PASSWORD}"
     fi
 }
 #endregion
@@ -783,6 +784,8 @@ setup_wizard() {
         update_upgrade
         install_update_phpma
     fi
+
+    print_db_info
     #endregion
 }
 #endregion
@@ -817,12 +820,14 @@ easy_menu() {
             setup_mariadb
             setup_panel_db
             install_update_panel
+            print_db_info
             ;;
         2)
             update_upgrade
             setup_mariadb
             setup_host_db
             install_update_wings
+            print_db_info
             ;;
         3)
             update_upgrade
@@ -875,6 +880,7 @@ advanced_menu() {
             setup_mariadb
             setup_panel_db
             install_update_panel
+            print_db_info
             ;;
         2)
             q_mariadb_host
@@ -884,6 +890,7 @@ advanced_menu() {
             setup_mariadb
             setup_host_db
             install_update_wings
+            print_db_info
             ;;
         3)
             update_upgrade
