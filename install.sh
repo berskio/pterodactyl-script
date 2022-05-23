@@ -344,7 +344,7 @@ install_update_panel() {
         cd /var/www/pterodactyl
 
         php artisan p:upgrade \
-            --no-interaction
+        --no-interaction
 
         success "Panel has been successfully updated."
     else
@@ -458,20 +458,20 @@ install_update_panel() {
         fi
 
         php artisan p:environment:setup \
-            --url="${PANEL_PROTOCOL}${panel_fqdn}" \
-            --timezone="$(cat /etc/timezone)" \
-            --cache="file" \
-            --session="database" \
-            --queue="database" \
-            --settings-ui=true
+        --url="${PANEL_PROTOCOL}${panel_fqdn}" \
+        --timezone="$(cat /etc/timezone)" \
+        --cache="file" \
+        --session="database" \
+        --queue="database" \
+        --settings-ui=true
 
         if [ "$DBPANEL_SETUP" = true ]; then
             php artisan p:environment:database \
-                --host="127.0.0.1" \
-                --port="3306" \
-                --database="$DBPANEL_DB" \
-                --username="$DBPANEL_USER" \
-                --password="$DBPANEL_PASSWORD"
+            --host="127.0.0.1" \
+            --port="3306" \
+            --database="$DBPANEL_DB" \
+            --username="$DBPANEL_USER" \
+            --password="$DBPANEL_PASSWORD"
         else
             php artisan p:environment:database
         fi
@@ -887,7 +887,11 @@ if [ "$WINGS_INSTALLED" = true ] || [ "$PANEL_INSTALLED" = true ] || [ "$PHPMA_I
         easy_menu
     fi
 else
-    setup_wizard
+    if [[ $1 == a* ]]; then
+        advanced_menu
+    else
+        setup_wizard
+    fi
 fi
 #endregion
 
