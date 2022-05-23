@@ -102,12 +102,6 @@ if [ "$virt" = "openvz" ] || [ "$virt" = "lxc" ]; then
 fi
 #endregion
 
-#region Check Installation
-[[ -d /var/www/pterodactyl ]] && PANEL_INSTALLED=true || PANEL_INSTALLED=false
-[[ -x /usr/local/bin/wings ]] && WINGS_INSTALLED=true || WINGS_INSTALLED=false
-[[ -d /var/www/pterodactyl/public/phpmyadmin ]] && PHPMA_INSTALLED=true || PHPMA_INSTALLED=false
-#endregion
-
 #region Get Latest Versions
 get_latest_release() {
     # Install Curl if not installed
@@ -338,7 +332,7 @@ q_firewall() {
 
 #region Install/Update Panel
 install_update_panel() {
-    if [ "$PANEL_INSTALLED" = true ]; then
+    if [ -d /var/www/pterodactyl ]; then
         info "Update Panel..."
 
         cd /var/www/pterodactyl
@@ -541,7 +535,7 @@ install_update_panel() {
 
 #region Install/Update Wings
 install_update_wings() {
-    if [ "$WINGS_INSTALLED" = true ]; then
+    if [ -x /usr/local/bin/wings ]; then
         info "Update Wings..."
 
         curl -L -o /usr/local/bin/wings "https://github.com/pterodactyl/wings/releases/latest/download/wings_linux_$([[ "$(uname -m)" == "x86_64" ]] && echo "amd64" || echo "arm64")"
@@ -630,8 +624,8 @@ install_update_wings() {
 
 #region Install/Update phpMyAdmin
 install_update_phpma() {
-    if [ "$PANEL_INSTALLED" = true ]; then
-        if [ "$PHPMA_INSTALLED" = true ]; then
+    if [ -d /var/www/pterodactyl ]; then
+        if [ -d /var/www/pterodactyl/public/phpmyadmin ]; then
             info "Update phpMyAdmin..."
 
             cd /var/www/pterodactyl/public/phpmyadmin
@@ -776,11 +770,11 @@ easy_menu() {
 
     while true; do
         echo
-        output "${GREEN}1)${NC} Panel ${GREEN}($([ "$PANEL_INSTALLED" = true ] && echo Update || echo Install))"
+        output "${GREEN}1)${NC} Panel ${GREEN}($([[ -d /var/www/pterodactyl ]] && echo Update || echo Install))"
         output "   \e[3m${GRAY}+ MARIADB[SSL], NGINX[SSL+HSTS], SSL + UFW\e[0m"
-        output "${BLUE}2)${NC} Wings ${BLUE}($([ "$WINGS_INSTALLED" = true ] && echo Update || echo Install))"
+        output "${BLUE}2)${NC} Wings ${BLUE}($([[ -x /usr/local/bin/wings ]] && echo Update || echo Install))"
         output "   \e[3m${GRAY}+ MARIADB[SSL], SSL + UFW\e[0m"
-        output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}($([ "$PHPMA_INSTALLED" = true ] && echo Update || echo Install))"
+        output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}($([[ -d /var/www/pterodactyl/public/phpmyadmin ]] && echo Update || echo Install))"
         output "   \e[3m${GRAY}+ SSL + UFW\e[0m"
 
         echo
@@ -833,9 +827,9 @@ advanced_menu() {
     while true; do
         echo
 
-        output "${GREEN}1)${NC} Panel ${GREEN}(Adv. $([ "$PANEL_INSTALLED" = true ] && echo Update || echo Install))"
-        output "${BLUE}2)${NC} Wings ${BLUE}(Adv. $([ "$WINGS_INSTALLED" = true ] && echo Update || echo Install))"
-        output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}(Adv. $([ "$PHPMA_INSTALLED" = true ] && echo Update || echo Install))"
+        output "${GREEN}1)${NC} Panel ${GREEN}(Adv. $([[ -d /var/www/pterodactyl ]] && echo Update || echo Install))"
+        output "${BLUE}2)${NC} Wings ${BLUE}(Adv. $([[ -x /usr/local/bin/wings ]] && echo Update || echo Install))"
+        output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}(Adv. $([[ -d /var/www/pterodactyl/public/phpmyadmin ]] && echo Update || echo Install))"
 
         echo
         output "${CYAN}E)${NC} Easy Mode"
@@ -886,7 +880,7 @@ advanced_menu() {
 #endregion
 
 #region Select correct mode
-if [ "$WINGS_INSTALLED" = true ] || [ "$PANEL_INSTALLED" = true ] || [ "$PHPMA_INSTALLED" = true ]; then
+if [[ -x /usr/local/bin/wings ]] || [ -d /var/www/pterodactyl ] || [ -d /var/www/pterodactyl/public/phpmyadmin ]; then
     if [[ $1 == a* ]]; then
         advanced_menu
     else
