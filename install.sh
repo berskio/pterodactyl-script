@@ -606,15 +606,9 @@ install_update_phpma() {
             curl -Lo phpMyAdmin-latest-all-languages.tar.gz "https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz"
             tar -xzvf phpMyAdmin-latest-all-languages.tar.gz --strip-components=1
 
-            #Ask for FQDN/IP
-            echo
-            info "Please enter the FQDN/IP of the Database (node.example.com): "
-            read -r db_fqdn
-
             #Change Config
             info "Setup phpMyAdmin Configuration"
             curl -o config.inc.php "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/phpmyadmin.php"
-            sed -i -e "s@<fqdn>@${db_fqdn}@g" config.inc.php
             sed -i -e "s@<blowfish>@$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w 32 | head -n 1)@g" config.inc.php
 
             chown -R www-data:www-data /var/www/pterodactyl/*

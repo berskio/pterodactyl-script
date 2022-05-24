@@ -5,7 +5,7 @@ $i = 0;
 /* Server: MariaDB [1] */
 $i++;
 $cfg['Servers'][$i]['verbose'] = 'MariaDB';
-$cfg['Servers'][$i]['host'] = '<fqdn>';
+$cfg['Servers'][$i]['host'] = 'localhost';
 $cfg['Servers'][$i]['port'] = '3306';
 $cfg['Servers'][$i]['socket'] = '';
 $cfg['Servers'][$i]['auth_type'] = 'cookie';
