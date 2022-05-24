@@ -61,7 +61,6 @@ DBHOST_PASSWORD=""
 DB_SSL=true
 DB_ROOT_PASSWORD=""
 
-HOST_FQDN=""
 PASSWORD_LENGTH=64
 #endregion
 
@@ -135,7 +134,7 @@ setup_mariadb() {
 
             #Setup Firewall
             if [ "$SETUP_FIREWALL" = true ]; then
-                output "Setup Firewall..."
+                info "Setup Firewall..."
                 setup_ufw
                 ufw allow 3306
             fi
@@ -144,7 +143,6 @@ setup_mariadb() {
             DB_ROOT_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
 
             #Secure MySQL
-            info "Setup secure MySQL installation..."
             C0="UPDATE mysql.global_priv SET priv=json_set(priv, '$.plugin', 'mysql_native_password', '$.authentication_string', PASSWORD('$DB_ROOT_PASSWORD')) WHERE User='root';"
             C1="DELETE FROM mysql.global_priv WHERE User='';"
             C2="DELETE FROM mysql.global_priv WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
@@ -152,28 +150,23 @@ setup_mariadb() {
             C4="DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
             C5="FLUSH PRIVILEGES;"
             mysql -u root -e "${C0}${C1}${C2}${C3}${C4}${C5}"
+            output "MySQL installation secured"
 
             #Update Configuration
-            info "Update MariaDB Configuration..."
             sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
 
             if [ "$DB_SSL" = true ]; then
 
-                #Ask for FQDN if not already set
-                if [ -z "$HOST_FQDN" ]; then
-                    echo
-                    info "Please enter the FQDN of the Database/Node (node.example.com): "
-                    read -r fqdn
+                #TODO: Generate SSL Certificate and update Config
 
-                    HOST_FQDN=$fqdn
-                fi
-
-                sed -i '/\[mysqld\]/a ssl-key=/etc/letsencrypt/live/'"${HOST_FQDN}"'/privkey.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
-                sed -i '/\[mysqld\]/a ssl-ca=/etc/letsencrypt/live/'"${HOST_FQDN}"'/chain.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
-                sed -i '/\[mysqld\]/a ssl-cert=/etc/letsencrypt/live/'"${HOST_FQDN}"'/cert.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
+                #Setup MySQL SSL
+                sed -i '/\[mysqld\]/a ssl-key=/etc/'"${a}"'/privkey.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
+                sed -i '/\[mysqld\]/a ssl-ca=/etc/'"${b}"'/chain.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
+                sed -i '/\[mysqld\]/a ssl-cert=/etc/'"${c}"'/cert.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
             fi
+            output "MariaDB Configuration updated"
 
-            service mysql restart
+            service mariadb restart
         fi
     fi
 }
@@ -217,15 +210,18 @@ setup_host_db() {
 #region Print DB Info
 print_db_info() {
     if [ "$DBPANEL_SETUP" = true ] || [ "$DBHOST_SETUP" = true ]; then
-        success "MariaDB has been successfully installed."
+        output "${GREEN}MariaDB has been successfully installed.\nRoot Password: ${DB_ROOT_PASSWORD}"
+        echo
     fi
 
     if [ "$DBPANEL_SETUP" = true ]; then
-        success "Panel\n-> Database: ${DBPANEL_DB}\n-> User: ${DBPANEL_USER}\n-> Password: ${DBPANEL_PASSWORD}"
+        output "${GREEN}Panel DB\n-> Database: ${DBPANEL_DB}\n-> User: ${DBPANEL_USER}\n-> Password: ${DBPANEL_PASSWORD}"
+        echo
     fi
 
     if [ "$DBHOST_SETUP" = true ]; then
-        success "Servers\n-> User: ${DBHOST_USER}\n-> Password: ${DBHOST_PASSWORD}"
+        output "${GREEN}Servers DB\n-> User: ${DBHOST_USER}\n-> Password: ${DBHOST_PASSWORD}"
+        echo
     fi
 }
 #endregion
@@ -466,9 +462,8 @@ install_update_panel() {
             php artisan p:environment:database
         fi
 
-        output
-        output
-        output "Set up E-Mail configuration? (y/N): "
+        echo
+        info "Set up E-Mail configuration? (y/N): "
         read -r mail_config
 
         if [[ "$mail_config" =~ [Yy] ]]; then
@@ -477,6 +472,7 @@ install_update_panel() {
 
         php artisan migrate --seed --force
 
+        info "Create Initial User..."
         php artisan p:user:make
 
         chown -R www-data:www-data /var/www/pterodactyl/*
@@ -549,14 +545,10 @@ install_update_wings() {
             ufw allow 2022
         fi
 
-        #Ask for FQDN if not already set
-        if [ -z "$HOST_FQDN" ]; then
-            echo
-            info "Please enter the FQDN of the Node (node.example.com): "
-            read -r fqdn
-
-            HOST_FQDN=$fqdn
-        fi
+        #Ask for FQDN
+        echo
+        info "Please enter the FQDN of the Node (node.example.com): "
+        read -r host_fqdn
 
         #Setup Let’s Encrypt
         if [ "$SETUP_LETSENCRYPT" = true ]; then
@@ -583,9 +575,9 @@ install_update_wings() {
 
             read -r panel_machine
             if [[ ! "$panel_machine" =~ [Nn] ]]; then
-                certbot certonly --webroot -w /var/www/pterodactyl/public --email "$le_email" --agree-tos -d "$HOST_FQDN" --non-interactive
+                certbot certonly --webroot -w /var/www/pterodactyl/public --email "$le_email" --agree-tos -d "$host_fqdn" --non-interactive
             else
-                certbot certonly --standalone --email "$le_email" --agree-tos -d "$HOST_FQDN" --non-interactive
+                certbot certonly --standalone --email "$le_email" --agree-tos -d "$host_fqdn" --non-interactive
             fi
         fi
 
@@ -640,18 +632,15 @@ install_update_phpma() {
             curl -Lo phpMyAdmin-latest-all-languages.tar.gz "https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz"
             tar -xzvf phpMyAdmin-latest-all-languages.tar.gz --strip-components=1
 
-            #Ask for FQDN if not already set
-            if [ -z "$HOST_FQDN" ]; then
-                echo
-                info "Please enter the FQDN of the Database/Node (node.example.com): "
-                read -r fqdn
-
-                HOST_FQDN=$fqdn
-            fi
+            #Ask for FQDN/IP
+            echo
+            info "Please enter the FQDN/IP of the Database (node.example.com): "
+            read -r db_fqdn
 
             #Change Config
+            info "Setup phpMyAdmin Configuration"
             curl -o config.inc.php "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/phpmyadmin.php"
-            sed -i -e "s@<fqdn>@${HOST_FQDN}@g" config.inc.php
+            sed -i -e "s@<fqdn>@${db_fqdn}@g" config.inc.php
             sed -i -e "s@<blowfish>@$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w 32 | head -n 1)@g" config.inc.php
 
             chown -R www-data:www-data /var/www/pterodactyl/*
