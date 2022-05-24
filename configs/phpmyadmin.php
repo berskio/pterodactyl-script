@@ -8,7 +8,6 @@ $cfg['Servers'][$i]['verbose'] = 'MariaDB';
 $cfg['Servers'][$i]['host'] = '<fqdn>';
 $cfg['Servers'][$i]['port'] = '3306';
 $cfg['Servers'][$i]['socket'] = '';
-$cfg['Servers'][$i]['ssl'] = true;
 $cfg['Servers'][$i]['auth_type'] = 'cookie';
 $cfg['Servers'][$i]['user'] = 'root';
 $cfg['Servers'][$i]['password'] = '';

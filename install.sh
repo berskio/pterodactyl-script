@@ -58,7 +58,6 @@ DBHOST_SETUP=true
 DBHOST_USER="pterodactyluser"
 DBHOST_PASSWORD=""
 
-DB_SSL=true
 DB_ROOT_PASSWORD=""
 
 PASSWORD_LENGTH=64
@@ -136,7 +135,6 @@ setup_mariadb() {
             if [ "$SETUP_FIREWALL" = true ]; then
                 info "Setup Firewall..."
                 setup_ufw
-                ufw allow 3306
             fi
 
             #Generate Root Password
@@ -151,20 +149,6 @@ setup_mariadb() {
             C5="FLUSH PRIVILEGES;"
             mysql -u root -e "${C0}${C1}${C2}${C3}${C4}${C5}"
             output "MySQL installation secured"
-
-            #Update Configuration
-            sed -i -- '/bind-address/s/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
-
-            if [ "$DB_SSL" = true ]; then
-
-                #TODO: Generate SSL Certificate and update Config
-
-                #Setup MySQL SSL
-                sed -i '/\[mysqld\]/a ssl-key=/etc/'"${a}"'/privkey.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
-                sed -i '/\[mysqld\]/a ssl-ca=/etc/'"${b}"'/chain.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
-                sed -i '/\[mysqld\]/a ssl-cert=/etc/'"${c}"'/cert.pem' /etc/mysql/mariadb.conf.d/50-server.cnf
-            fi
-            output "MariaDB Configuration updated"
 
             service mariadb restart
         fi
@@ -199,9 +183,9 @@ setup_host_db() {
         fi
 
         output "Create $DBHOST_USER user..."
-        C0="CREATE USER '$DBHOST_USER'@'%' IDENTIFIED BY '$DBHOST_PASSWORD';"
+        C0="CREATE USER '$DBHOST_USER'@'127.0.0.1' IDENTIFIED BY '$DBHOST_PASSWORD';"
 
-        C1="GRANT ALL PRIVILEGES ON *.* TO '$DBHOST_USER'@'%' WITH GRANT OPTION;"
+        C1="GRANT ALL PRIVILEGES ON *.* TO '$DBHOST_USER'@'127.0.0.1' WITH GRANT OPTION;"
         mysql -u root -e "${C0}${C1}"
     fi
 }
@@ -210,7 +194,7 @@ setup_host_db() {
 #region Print DB Info
 print_db_info() {
     if [ "$DBPANEL_SETUP" = true ] || [ "$DBHOST_SETUP" = true ]; then
-        output "${GREEN}MariaDB has been successfully installed.\nRoot Password: ${DB_ROOT_PASSWORD}"
+        output "${GREEN}MariaDB has been successfully installed.\n->Root Password: ${DB_ROOT_PASSWORD}"
         echo
     fi
 
@@ -239,11 +223,6 @@ q_mariadb_panel() {
 
     if [ "$DBPANEL_SETUP" = true ]; then
         echo
-        info "Activate SSL certificate for MySQL connection? (Y/n)"
-        read -r question_ssl
-        [[ ! "$question_ssl" =~ [Nn] ]] && DB_SSL=true || DB_SSL=false
-
-        echo
         info "Name of the panel database? (panel)"
         read -r question_db
         DBPANEL_DB=${question_db:-panel}
@@ -271,11 +250,6 @@ q_mariadb_host() {
     [[ ! "$question_setup" =~ [Nn] ]] && DBHOST_SETUP=true || DBHOST_SETUP=false
 
     if [ "$DBHOST_SETUP" = true ]; then
-        echo
-        info "Activate SSL certificate for MySQL connection? (Y/n)"
-        read -r question_ssl
-        [[ ! "$question_ssl" =~ [Nn] ]] && DB_SSL=true || DB_SSL=false
-
         echo
         info "Database username? (pterodactyluser)"
         read -r question_user
@@ -668,7 +642,7 @@ setup_wizard() {
     while true; do
         echo
         output "${GREEN}Install Panel?"
-        output "   \e[3m${GRAY}+ MARIADB[SSL], NGINX[SSL+HSTS], SSL + UFW\e[0m"
+        output "   \e[3m${GRAY}+ MARIADB, NGINX[SSL+HSTS], UFW\e[0m"
         echo -ne "Choose an option (Y/N): "
 
         read -r option
@@ -691,7 +665,7 @@ setup_wizard() {
     while true; do
         echo
         output "${BLUE}Install Wings?"
-        output "   \e[3m${GRAY}+ MARIADB[SSL], SSL + UFW\e[0m"
+        output "   \e[3m${GRAY}+ MARIADB, SSL, UFW\e[0m"
         echo -ne "Choose an option (Y/N): "
 
         read -r option
@@ -714,7 +688,7 @@ setup_wizard() {
     while true; do
         echo
         output "${PURPLE}Install phpMyAdmin?"
-        output "   \e[3m${GRAY}+ SSL + UFW\e[0m"
+        output "   \e[3m${GRAY}+ UFW\e[0m"
         echo -ne "Choose an option (Y/N): "
 
         read -r option
@@ -769,11 +743,11 @@ easy_menu() {
     while true; do
         echo
         output "${GREEN}1)${NC} Panel ${GREEN}($([[ -d /var/www/pterodactyl ]] && echo Update || echo Install))"
-        [[ -d /var/www/pterodactyl ]] && output "   \e[3m${GRAY}+ MARIADB[SSL], NGINX[SSL+HSTS], SSL + UFW\e[0m"
+        [[ -d /var/www/pterodactyl ]] && output "   \e[3m${GRAY}+ MARIADB, NGINX[SSL+HSTS], SSL, UFW\e[0m"
         output "${BLUE}2)${NC} Wings ${BLUE}($([[ -x /usr/local/bin/wings ]] && echo Update || echo Install))"
-        [[ -x /usr/local/bin/wings ]] && output "   \e[3m${GRAY}+ MARIADB[SSL], SSL + UFW\e[0m"
+        [[ -x /usr/local/bin/wings ]] && output "   \e[3m${GRAY}+ MARIADB, SSL, UFW\e[0m"
         output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}($([[ -d /var/www/pterodactyl/public/phpmyadmin ]] && echo Update || echo Install))"
-        [[ -d /var/www/pterodactyl/public/phpmyadmin ]] && output "   \e[3m${GRAY}+ SSL + UFW\e[0m"
+        [[ -d /var/www/pterodactyl/public/phpmyadmin ]] && output "   \e[3m${GRAY}+ UFW\e[0m"
 
         echo
         output "${CYAN}A)${NC} Advanced Mode"
