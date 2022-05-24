@@ -93,14 +93,18 @@ virt="$(systemd-detect-virt)"
 if [ "$virt" = "openvz" ] || [ "$virt" = "lxc" ]; then
     warning "Unsupported Virtualization! OpenVZ and LXC will most likely be unable to run Wings."
 
-    output "Are you sure you want to proceed? (y/N): "
+    info "Are you sure you want to proceed? (y/N): "
     read -r PROCEED_VIRTUALIZATION
 
     if [[ ! "$PROCEED_VIRTUALIZATION" =~ [Yy] ]]; then
-        output "${RED}Installation aborted!"
+        error "Installation aborted!"
         exit 1
     fi
 fi
+#endregion
+
+#region Check if Curl installed
+which curl &>/dev/null || apt-get install -y curl
 #endregion
 #
 #endregion
@@ -744,7 +748,7 @@ easy_menu() {
         [[ -d /var/www/pterodactyl/public/phpmyadmin ]] && output "   \e[3m${GRAY}+ UFW\e[0m"
 
         echo
-        output "${CYAN}A)${NC} Advanced Mode"
+        output "${CYAN}T)${NC} Tools"
         output "${RED}Q)${NC} Quit"
         echo -ne "Choose an option: "
 
@@ -769,10 +773,8 @@ easy_menu() {
             update_upgrade
             install_update_phpma
             ;;
-        [Aa])
-            echo
-            echo
-            advanced_menu
+        [Tt])
+            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/tools.sh")
             exit 0
             ;;
         [Qq])
@@ -800,7 +802,7 @@ advanced_menu() {
         output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}(Adv. $([[ -d /var/www/pterodactyl/public/phpmyadmin ]] && echo Update || echo Install))"
 
         echo
-        output "${CYAN}E)${NC} Easy Mode"
+        output "${CYAN}T)${NC} Tools"
         output "${RED}Q)${NC} Quit"
         echo -ne "Choose an option: "
 
@@ -834,10 +836,8 @@ advanced_menu() {
             update_upgrade
             install_update_phpma
             ;;
-        [Ee])
-            echo
-            echo
-            easy_menu
+        [Tt])
+            . <(curl -s "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/tools.sh")
             exit 0
             ;;
         [Qq])
