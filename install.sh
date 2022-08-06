@@ -125,9 +125,17 @@ setup_ufw() {
 }
 #endregion
 
+#region Get latest Release
+get_latest_release() {
+    curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+        grep '"tag_name":' |                                          # Get tag line
+        sed -E 's/.*"([^"]+)".*/\1/'                                  # Pluck JSON value
+}
+#endregion
+
 #region Setup MariaDB
 setup_mariadb() {
-    if [ "$DBPANEL_SETUP" = true ] || [ "$DBHOST_SETUP" = true ]; then
+    if ([ "$DBPANEL_SETUP" = true ] || [ "$DBHOST_SETUP" = true ]) && ([ ! -d /var/www/pterodactyl ] && [ ! -x /usr/local/bin/wings ]); then
         info "Install MariaDB..."
 
         #Check if MariaDB Installed
@@ -162,7 +170,7 @@ setup_mariadb() {
 
 #region Setup Panel Database
 setup_panel_db() {
-    if [ "$DBPANEL_SETUP" = true ]; then
+    if [ "$DBPANEL_SETUP" = true ] && [ ! -d /var/www/pterodactyl ]; then
         #Generate Password if empty
         if [ -z "$DBPANEL_PASSWORD" ]; then
             DBPANEL_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
@@ -180,7 +188,7 @@ setup_panel_db() {
 
 #region Setup Host Database
 setup_host_db() {
-    if [ "$DBHOST_SETUP" = true ]; then
+    if [ "$DBHOST_SETUP" = true ] && [ ! -x /usr/local/bin/wings ]; then
         #Generate Password if empty
         if [ -z "$DBHOST_PASSWORD" ]; then
             DBHOST_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
@@ -197,18 +205,18 @@ setup_host_db() {
 
 #region Print DB Info
 print_db_info() {
-    if [ "$DBPANEL_SETUP" = true ] || [ "$DBHOST_SETUP" = true ]; then
-        output "${GREEN}MariaDB has been successfully installed.\n->Root Password: ${DB_ROOT_PASSWORD}"
+    if ([ "$DBPANEL_SETUP" = true ] || [ "$DBHOST_SETUP" = true ]) && [ ! -z "$DB_ROOT_PASSWORD" ]; then
+        output "${GREEN}MariaDB has been successfully installed.\n${NC}->Root Password: ${DB_ROOT_PASSWORD}"
         echo
     fi
 
-    if [ "$DBPANEL_SETUP" = true ]; then
-        output "${GREEN}Panel DB\n-> Database: ${DBPANEL_DB}\n-> User: ${DBPANEL_USER}\n-> Password: ${DBPANEL_PASSWORD}"
+    if [ "$DBPANEL_SETUP" = true ] && [ ! -z "$DBPANEL_PASSWORD" ]; then
+        output "${GREEN}Panel DB\n${NC}-> Database: ${DBPANEL_DB}\n-> User: ${DBPANEL_USER}\n-> Password: ${DBPANEL_PASSWORD}"
         echo
     fi
 
-    if [ "$DBHOST_SETUP" = true ]; then
-        output "${GREEN}Servers DB\n-> User: ${DBHOST_USER}\n-> Password: ${DBHOST_PASSWORD}"
+    if [ "$DBHOST_SETUP" = true ] && [ ! -z "$DBHOST_PASSWORD" ]; then
+        output "${BLUE}Servers DB\n${NC}-> User: ${DBHOST_USER}\n-> Password: ${DBHOST_PASSWORD}"
         echo
     fi
 }
@@ -316,7 +324,7 @@ install_update_panel() {
         cd /var/www/pterodactyl
 
         php artisan p:upgrade \
-        --no-interaction
+            --no-interaction
 
         success "Panel has been successfully updated."
         #endregion
@@ -422,20 +430,20 @@ install_update_panel() {
         fi
 
         php artisan p:environment:setup \
-        --url="${PANEL_PROTOCOL}${panel_fqdn}" \
-        --timezone="$(cat /etc/timezone)" \
-        --cache="file" \
-        --session="database" \
-        --queue="database" \
-        --settings-ui=true
+            --url="${PANEL_PROTOCOL}${panel_fqdn}" \
+            --timezone="$(cat /etc/timezone)" \
+            --cache="file" \
+            --session="database" \
+            --queue="database" \
+            --settings-ui=true
 
         if [ "$DBPANEL_SETUP" = true ]; then
             php artisan p:environment:database \
-            --host="127.0.0.1" \
-            --port="3306" \
-            --database="$DBPANEL_DB" \
-            --username="$DBPANEL_USER" \
-            --password="$DBPANEL_PASSWORD"
+                --host="127.0.0.1" \
+                --port="3306" \
+                --database="$DBPANEL_DB" \
+                --username="$DBPANEL_USER" \
+                --password="$DBPANEL_PASSWORD"
         else
             php artisan p:environment:database
         fi
@@ -683,26 +691,29 @@ setup_wizard() {
     #endregion
 
     #region phpMyAdmin Menu
-    while true; do
-        echo
-        output "${PURPLE}Install phpMyAdmin?"
-        output "   \e[3m${GRAY}+ UFW\e[0m"
-        echo -ne "Choose an option (Y/N): "
+    # Only if Panel will installed
+    if [ "$INSTALL_PANEL" = true ]; then
+        while true; do
+            echo
+            output "${PURPLE}Install phpMyAdmin?"
+            output "   \e[3m${GRAY}+ UFW\e[0m"
+            echo -ne "Choose an option (Y/N): "
 
-        read -r option
+            read -r option
 
-        case $option in
-        [Yy])
-            INSTALL_PHPMA=true
-            break
-            ;;
-        [Nn])
-            INSTALL_PHPMA=false
-            break
-            ;;
-        *) ;;
-        esac
-    done
+            case $option in
+            [Yy])
+                INSTALL_PHPMA=true
+                break
+                ;;
+            [Nn])
+                INSTALL_PHPMA=false
+                break
+                ;;
+            *) ;;
+            esac
+        done
+    fi
     #endregion
 
     #region Install selected
@@ -725,7 +736,9 @@ setup_wizard() {
         install_update_phpma
     fi
 
-    print_db_info
+    if [ "$INSTALL_PANEL" = true ] || [ "$INSTALL_WINGS" = true ]; then
+        print_db_info
+    fi
     #endregion
 }
 #endregion
@@ -741,11 +754,11 @@ easy_menu() {
     while true; do
         echo
         output "${GREEN}1)${NC} Panel ${GREEN}($([[ -d /var/www/pterodactyl ]] && echo Update || echo Install))"
-        [[ -d /var/www/pterodactyl ]] && output "   \e[3m${GRAY}+ MARIADB, NGINX[SSL+HSTS], SSL, UFW\e[0m"
+        [[ ! -d /var/www/pterodactyl ]] && output "   \e[3m${GRAY}+ MARIADB, NGINX[SSL+HSTS], SSL, UFW\e[0m" || output "   \e[3m${GRAY}-> $(get_latest_release "pterodactyl/panel")\e[0m"
         output "${BLUE}2)${NC} Wings ${BLUE}($([[ -x /usr/local/bin/wings ]] && echo Update || echo Install))"
-        [[ -x /usr/local/bin/wings ]] && output "   \e[3m${GRAY}+ MARIADB, SSL, UFW\e[0m"
+        [[ ! -x /usr/local/bin/wings ]] && output "   \e[3m${GRAY}+ MARIADB, SSL, UFW\e[0m" || output "   \e[3m${GRAY}-> $(get_latest_release "pterodactyl/wings")\e[0m"
         output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}($([[ -d /var/www/pterodactyl/public/phpmyadmin ]] && echo Update || echo Install))"
-        [[ -d /var/www/pterodactyl/public/phpmyadmin ]] && output "   \e[3m${GRAY}+ UFW\e[0m"
+        [[ ! -d /var/www/pterodactyl/public/phpmyadmin ]] && output "   \e[3m${GRAY}+ UFW\e[0m" || output "   \e[3m${GRAY}-> $(get_latest_release "phpmyadmin/phpmyadmin" | sed 's/[^0-9_]//g; /^[_]/ s/.//; s/_/./g')\e[0m"
 
         echo
         output "${CYAN}T)${NC} Tools"
