@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-VERSION="0.2.0"
-PHP_VERSION=8.0
+VERSION="0.2.1"
+PHP_VERSION=8.1
 
 #region Text Formatting
 NC="\033[0m" # Normal Color
@@ -162,6 +162,12 @@ setup_mariadb() {
             mysql -u root -e "${C0}${C1}${C2}${C3}${C4}${C5}"
             output "MySQL installation secured"
 
+            #Update Configuration
+            echo 
+            info "Allowed IPs for remote access to the database E.g. 1.2.3.4,...? (0.0.0.0)"
+            read -r question_remote_ips
+            sed -i -- "/bind-address/s/127.0.0.1/${question_remote_ips:-0.0.0.0}/g" /etc/mysql/mariadb.conf.d/50-server.cnf
+
             service mariadb restart
         fi
     fi
@@ -195,9 +201,9 @@ setup_host_db() {
         fi
 
         output "Create $DBHOST_USER user..."
-        C0="CREATE USER '$DBHOST_USER'@'127.0.0.1' IDENTIFIED BY '$DBHOST_PASSWORD';"
+        C0="CREATE USER '$DBHOST_USER'@'%' IDENTIFIED BY '$DBHOST_PASSWORD';"
 
-        C1="GRANT ALL PRIVILEGES ON *.* TO '$DBHOST_USER'@'127.0.0.1' WITH GRANT OPTION;"
+        C1="GRANT ALL PRIVILEGES ON *.* TO '$DBHOST_USER'@'%' WITH GRANT OPTION;"
         mysql -u root -e "${C0}${C1}"
     fi
 }
@@ -321,6 +327,24 @@ install_update_panel() {
     if [ -d /var/www/pterodactyl ]; then
         info "Update Panel..."
 
+        # Update PHP
+        curr_php_version=$(grep -o -E 'php([0-9]+.+[0-9]+)+(-fpm)?' /etc/nginx/sites-available/pterodactyl.conf | grep -o 'php[0-9.]*')
+        if [ -n "$curr_php_version" ]; then
+            if [[ "$curr_php_version" < "$PHP_VERSION" ]]; then
+                echo
+                info "PHP version $PHP_VERSION is available! Do you want to install the new version? (y/N)"
+                read -r question_update_php
+                if [[ "$question_update_php" =~ [Yy] ]]; then
+                    apt-get update -y
+                    info "Remove old version..."
+                    apt-get purge -y php${curr_php_version} php${curr_php_version}-{cli,common,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip}
+                    info "Install new version..."
+                    apt-get install -y php${PHP_VERSION} php${PHP_VERSION}-{cli,common,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip}
+                    sed -i -e "s@php${curr_php_version}@php${PHP_VERSION}@g" /etc/nginx/sites-available/pterodactyl.conf
+                fi
+            fi
+        fi
+
         cd /var/www/pterodactyl
 
         php artisan p:upgrade \
@@ -373,15 +397,7 @@ install_update_panel() {
 
             #Install Certbot
             info "Install Certbot..."
-            apt-get install -y snapd
-            snap install core
-            snap refresh core
-            apt-get remove -y certbot
-            snap install --classic certbot
-
-            if [ ! -L "/usr/bin/certbot" ]; then
-                ln -s /snap/bin/certbot /usr/bin/certbot
-            fi
+            apt-get install -y certbot
 
             #Setup Webserver without SSL
             if [ -f "/etc/nginx/sites-enabled/default" ]; then
@@ -544,15 +560,7 @@ install_update_wings() {
 
             #Install Certbot
             info "Install Certbot..."
-            apt-get install -y snapd
-            snap install core
-            snap refresh core
-            apt-get remove -y certbot
-            snap install --classic certbot
-
-            if [ ! -L "/usr/bin/certbot" ]; then
-                ln -s /snap/bin/certbot /usr/bin/certbot
-            fi
+            apt-get install -y certbot
 
             ufw allow 80
 
