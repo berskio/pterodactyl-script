@@ -873,6 +873,13 @@ advanced_menu() {
 #endregion
 
 #region Select correct mode
+if [[ $1 == t* ]]; then
+    echo
+    output "${YELLOW}* Pterodactyl Script v${VERSION} *"
+    output "https://github.com/BAERSERK/pterodactyl-script"
+    . <(curl -s "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/tools.sh")
+    exit 0
+fi
 if [[ -x /usr/local/bin/wings ]] || [ -d /var/www/pterodactyl ] || [ -d /var/www/pterodactyl/public/phpmyadmin ]; then
     if [[ $1 == a* ]]; then
         advanced_menu
