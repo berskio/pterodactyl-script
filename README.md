@@ -5,8 +5,7 @@
 ## Installation
 
 ```bash
-wget https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/install.sh
-sudo bash install.sh
+curl https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/install.sh | sudo bash
 ```
 
 ## Features
@@ -18,17 +17,16 @@ sudo bash install.sh
 
 ### More
 * Automatic certificates from Let's Encrypt 
-* Automatic configuration of Firewall (UFW)
-* Automatic PHP Version updates 
+* Automatic configuration of Firewall (UFW) 
 
 ## Supported Systems:
 
 | Operating System | Version | Architectures | Supported          |
 | ---------------- |---------| ------------- | ------------------ |
-| Ubuntu           | ≤ 18.04   | x86_64        | :x:                |
+| Ubuntu           | 18.04   | x86_64        | :x:                |
 |                  | 20.04   | x86_64        | :heavy_check_mark: |
 |                  | 22.04   | x86_64        | :heavy_check_mark: |
-| Debian           | ≤ 9       | x86_64        | :x:                |
+| Debian           | 9       | x86_64        | :x:                |
 |                  | 10      | x86_64        | :heavy_check_mark: |
 |                  | 11      | x86_64        | :heavy_check_mark: |
 
@@ -37,5 +35,5 @@ sudo bash install.sh
 **You can disable or customize specific services. To customize, you can run the script in advanced mode:**
 
 ```bash
-sudo bash install.sh advanced
+curl https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/install.sh | sudo bash advanced
 ```
