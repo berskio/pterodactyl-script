@@ -2,7 +2,7 @@
 set -e
 
 VERSION="0.2.1"
-PHP_VERSION=8.1
+PHP_VERSION=8.2
 
 #region Text Formatting
 NC="\033[0m" # Normal Color
