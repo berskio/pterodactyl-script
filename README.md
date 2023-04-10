@@ -25,10 +25,10 @@ sudo bash install.sh
 
 | Operating System | Version | Architectures | Supported          |
 | ---------------- |---------| ------------- | ------------------ |
-| Ubuntu           | ≤ 18.04   | x86_64        | :x:                |
+| Ubuntu           | ≤ 18.04 | x86_64        | :x:                |
 |                  | 20.04   | x86_64        | :heavy_check_mark: |
 |                  | 22.04   | x86_64        | :heavy_check_mark: |
-| Debian           | ≤ 9       | x86_64        | :x:                |
+| Debian           | ≤ 9     | x86_64        | :x:                |
 |                  | 10      | x86_64        | :heavy_check_mark: |
 |                  | 11      | x86_64        | :heavy_check_mark: |
 
