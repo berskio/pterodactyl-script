@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="0.2.1"
+VERSION="0.2.2"
 PHP_VERSION=8.2
 
 #region Text Formatting
@@ -159,6 +159,14 @@ setup_mariadb() {
             C3="DROP DATABASE IF EXISTS test;"
             C4="DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
             C5="FLUSH PRIVILEGES;"
+
+            #If the mysql.global_priv table does not exist (under v10.4.1)
+            if [[ ! $(mysql -u root -e "USE mysql; SHOW TABLES LIKE 'global_priv';") ]]; then
+                C0="UPDATE mysql.user SET Password=PASSWORD('$DB_ROOT_PASSWORD') WHERE User='root';"
+                C1="DELETE FROM mysql.user WHERE User='';"
+                C2="DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+            fi
+
             mysql -u root -e "${C0}${C1}${C2}${C3}${C4}${C5}"
             output "MySQL installation secured"
 
