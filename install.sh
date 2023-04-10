@@ -163,7 +163,7 @@ setup_mariadb() {
             output "MySQL installation secured"
 
             #Update Configuration
-            echo 
+            echo
             info "Allowed IPs for remote access to the database E.g. 1.2.3.4,...? (0.0.0.0)"
             read -r question_remote_ips
             sed -i -- "/bind-address/s/127.0.0.1/${question_remote_ips:-0.0.0.0}/g" /etc/mysql/mariadb.conf.d/50-server.cnf
@@ -873,6 +873,13 @@ advanced_menu() {
 #endregion
 
 #region Select correct mode
+if [[ $1 == t* ]]; then
+    echo
+    output "${YELLOW}* Pterodactyl Script v${VERSION} *"
+    output "https://github.com/BAERSERK/pterodactyl-script"
+    . <(curl -s "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/tools.sh")
+    exit 0
+fi
 if [[ -x /usr/local/bin/wings ]] || [ -d /var/www/pterodactyl ] || [ -d /var/www/pterodactyl/public/phpmyadmin ]; then
     if [[ $1 == a* ]]; then
         advanced_menu
