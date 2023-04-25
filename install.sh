@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="0.2.2"
+VERSION="0.2.3"
 PHP_VERSION=8.2
 
 #region Text Formatting
@@ -127,10 +127,21 @@ setup_ufw() {
 
 #region Get latest Release
 get_latest_release() {
-    curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+    curl -s "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
         grep '"tag_name":' |                                          # Get tag line
         sed -E 's/.*"([^"]+)".*/\1/'                                  # Pluck JSON value
 }
+#endregion
+
+#region Check for Updates
+NEW_VERSION=$(get_latest_release "BAERSERK/pterodactyl-script") 
+if [[ "$VERSION" < "$($NEW_VERSION | sed 's/^v//')" ]]; then
+    info "Update script from ${RED}v${VERSION} ${CYAN}to ${GREEN}v${NEW_VERION}"
+    curl -sSL -O https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/$NEW_VERSION/install.sh
+    bash install.sh
+else
+    info "This script is up-to-date."
+fi
 #endregion
 
 #region Setup MariaDB
@@ -172,9 +183,14 @@ setup_mariadb() {
 
             #Update Configuration
             echo
-            info "Allowed IPs for remote access to the database E.g. 1.2.3.4,...? (0.0.0.0)"
-            read -r question_remote_ips
-            sed -i -- "/bind-address/s/127.0.0.1/${question_remote_ips:-0.0.0.0}/g" /etc/mysql/mariadb.conf.d/50-server.cnf
+            info "Should the database be accessible from outside? (Y/n)"
+            read -r question_remote
+            if [[ ! "$question_remote" =~ [Nn] ]]; then
+                sed -i -- "/bind-address/s/127.0.0.1/0.0.0.0/g" /etc/mysql/mariadb.conf.d/50-server.cnf
+                if [ "$SETUP_FIREWALL" = true ]; then
+                    ufw allow 3306
+                fi
+            fi
 
             service mariadb restart
         fi
@@ -459,6 +475,7 @@ install_update_panel() {
             --cache="file" \
             --session="database" \
             --queue="database" \
+            --telemetry=false \
             --settings-ui=true
 
         if [ "$DBPANEL_SETUP" = true ]; then
@@ -774,7 +791,7 @@ easy_menu() {
         output "${BLUE}2)${NC} Wings ${BLUE}($([[ -x /usr/local/bin/wings ]] && echo Update || echo Install))"
         [[ ! -x /usr/local/bin/wings ]] && output "   \e[3m${GRAY}+ MARIADB, SSL, UFW\e[0m" || output "   \e[3m${GRAY}-> $(get_latest_release "pterodactyl/wings")\e[0m"
         output "${PURPLE}3)${NC} phpMyAdmin ${PURPLE}($([[ -d /var/www/pterodactyl/public/phpmyadmin ]] && echo Update || echo Install))"
-        [[ ! -d /var/www/pterodactyl/public/phpmyadmin ]] && output "   \e[3m${GRAY}+ UFW\e[0m" || output "   \e[3m${GRAY}-> $(get_latest_release "phpmyadmin/phpmyadmin" | sed 's/[^0-9_]//g; /^[_]/ s/.//; s/_/./g')\e[0m"
+        [[ ! -d /var/www/pterodactyl/public/phpmyadmin ]] && output "   \e[3m${GRAY}+ UFW\e[0m" || output "   \e[3m${GRAY}-> $(curl -s https://www.phpmyadmin.net/home_page/version.txt | sed -n '1p')\e[0m"
 
         echo
         output "${CYAN}T)${NC} Tools"
