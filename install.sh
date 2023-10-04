@@ -150,7 +150,7 @@ setup_mariadb() {
             fi
 
             #Generate Root Password
-            DB_ROOT_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
+            DB_ROOT_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9\!\#\$\%\&\(\)\*\+,\-\./\:\<\=\>\?\@\[\]\^\_\{\|\}\~' | fold -w $PASSWORD_LENGTH | head -n 1)
 
             #Secure MySQL
             C0="UPDATE mysql.global_priv SET priv=json_set(priv, '$.plugin', 'mysql_native_password', '$.authentication_string', PASSWORD('$DB_ROOT_PASSWORD')) WHERE User='root';"
@@ -187,7 +187,7 @@ setup_panel_db() {
     if [ "$DBPANEL_SETUP" = true ] && [ ! -d /var/www/pterodactyl ]; then
         #Generate Password if empty
         if [ -z "$DBPANEL_PASSWORD" ]; then
-            DBPANEL_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
+            DBPANEL_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9\!\#\$\%\&\(\)\*\+,\-\./\:\<\=\>\?\@\[\]\^\_\{\|\}\~' | fold -w $PASSWORD_LENGTH | head -n 1)
         fi
 
         C0="CREATE USER '$DBPANEL_USER'@'127.0.0.1' IDENTIFIED BY '$DBPANEL_PASSWORD';"
@@ -205,7 +205,7 @@ setup_host_db() {
     if [ "$DBHOST_SETUP" = true ] && [ ! -x /usr/local/bin/wings ]; then
         #Generate Password if empty
         if [ -z "$DBHOST_PASSWORD" ]; then
-            DBHOST_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w $PASSWORD_LENGTH | head -n 1)
+            DBHOST_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9\!\#\$\%\&\(\)\*\+,\-\./\:\<\=\>\?\@\[\]\^\_\{\|\}\~' | fold -w $PASSWORD_LENGTH | head -n 1)
         fi
 
         output "Create $DBHOST_USER user..."
@@ -637,7 +637,7 @@ install_update_phpma() {
             #Change Config
             info "Setup phpMyAdmin Configuration"
             curl -o config.inc.php "https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/main/configs/phpmyadmin.php"
-            sed -i -e "s@<blowfish>@$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!#$%&()*+,-./:;<=>?@[\]^_{|}~' | fold -w 32 | head -n 1)@g" config.inc.php
+            sed -i -e "s@<blowfish>@$(cat /dev/urandom | tr -dc 'a-zA-Z0-9\!\#\$\%\&\(\)\*\+,\-\./\:\<\=\>\?\@\[\]\^\_\{\|\}\~' | fold -w 32 | head -n 1)@g" config.inc.php
 
             chown -R www-data:www-data /var/www/pterodactyl/*
 
