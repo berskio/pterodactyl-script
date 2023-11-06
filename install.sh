@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="0.2.4"
+VERSION="0.2.5"
 PHP_VERSION=8.2
 
 #region Text Formatting
@@ -134,10 +134,10 @@ get_latest_release() {
 #endregion
 
 #region Check for Updates
-NEW_VERSION=$(get_latest_release "BAERSERK/pterodactyl-script")
-if [[ "$VERSION" < "$($NEW_VERSION | sed 's/^v//')" ]]; then
+NEW_VERSION=$(get_latest_release "BAERSERK/pterodactyl-script" | sed "s/^v//")
+if [[ "$VERSION" < "$NEW_VERSION" ]]; then
     info "Update script from ${RED}v${VERSION} ${CYAN}to ${GREEN}v${NEW_VERION}"
-    curl -sSL -O https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/$NEW_VERSION/install.sh
+    curl -sSL -O https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/v$NEW_VERSION/install.sh
     bash install.sh
 else
     info "This script is up-to-date."
