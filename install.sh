@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION="0.2.3"
+VERSION="0.2.4"
 PHP_VERSION=8.2
 
 #region Text Formatting
@@ -128,13 +128,13 @@ setup_ufw() {
 #region Get latest Release
 get_latest_release() {
     curl -s "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
-        grep '"tag_name":' |                                          # Get tag line
-        sed -E 's/.*"([^"]+)".*/\1/'                                  # Pluck JSON value
+        grep '"tag_name":' |                                    # Get tag line
+        sed -E 's/.*"([^"]+)".*/\1/'                            # Pluck JSON value
 }
 #endregion
 
 #region Check for Updates
-NEW_VERSION=$(get_latest_release "BAERSERK/pterodactyl-script") 
+NEW_VERSION=$(get_latest_release "BAERSERK/pterodactyl-script")
 if [[ "$VERSION" < "$($NEW_VERSION | sed 's/^v//')" ]]; then
     info "Update script from ${RED}v${VERSION} ${CYAN}to ${GREEN}v${NEW_VERION}"
     curl -sSL -O https://raw.githubusercontent.com/BAERSERK/pterodactyl-script/$NEW_VERSION/install.sh
@@ -587,17 +587,55 @@ install_update_wings() {
             info "Install Certbot..."
             apt-get install -y certbot
 
-            ufw allow 80
+            while true; do
+                echo
+                info "Runs the panel on this machine? (Y/N)"
+                read -r panel_machine
 
-            echo
-            info "Runs the panel on this machine? (Y/n)"
+                case $panel_machine in
+                [Yy])
+                    ufw allow 80
+                    certbot certonly --webroot -w /var/www/pterodactyl/public --email "$le_email" --agree-tos -d "$host_fqdn" --non-interactive
+                    break
+                    ;;
+                [Nn])
+                    while true; do
+                        echo
+                        info "The certificate can be created with the DNS-01 challenge, so there is no need to open port 80. The domain must use Cloudflare to do this."
+                        info "Should it be created through this? (Y/N)"
+                        read -r le_dns
 
-            read -r panel_machine
-            if [[ ! "$panel_machine" =~ [Nn] ]]; then
-                certbot certonly --webroot -w /var/www/pterodactyl/public --email "$le_email" --agree-tos -d "$host_fqdn" --non-interactive
-            else
-                certbot certonly --standalone --email "$le_email" --agree-tos -d "$host_fqdn" --non-interactive
-            fi
+                        case $le_dns in
+                        [Yy])
+                            #Install Certbot Cloudflare Plugin
+                            apt-get install -y python3-certbot-dns-cloudflare
+
+                            #Ask for Cloudflare API Token
+                            echo
+                            info "Please enter the Cloudflare API Token: "
+                            read -r cloudflare_token
+
+                            info "Write API credentials..."
+                            mkdir -p /root/.secrets/certbot
+                            echo -e "dns_cloudflare_api_token = $cloudflare_token" >/root/.secrets/certbot/cloudflare.ini
+                            chmod 600 /root/.secrets/certbot/cloudflare.ini
+
+                            certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/certbot/cloudflare.ini --email "$le_email" --agree-tos -d "$host_fqdn" --non-interactive
+                            break
+                            ;;
+                        [Nn])
+                            ufw allow 80
+                            certbot certonly --standalone --email "$le_email" --agree-tos -d "$host_fqdn" --non-interactive
+                            break
+                            ;;
+                        *) ;;
+                        esac
+                    done
+                    break
+                    ;;
+                *) ;;
+                esac
+            done
         fi
 
         #Install Docker
@@ -683,7 +721,6 @@ setup_wizard() {
         output "${GREEN}Install Panel?"
         output "   \e[3m${GRAY}+ MARIADB, NGINX[SSL+HSTS], UFW\e[0m"
         echo -ne "Choose an option (Y/N): "
-
         read -r option
 
         case $option in
@@ -706,7 +743,6 @@ setup_wizard() {
         output "${BLUE}Install Wings?"
         output "   \e[3m${GRAY}+ MARIADB, SSL, UFW\e[0m"
         echo -ne "Choose an option (Y/N): "
-
         read -r option
 
         case $option in
@@ -731,7 +767,6 @@ setup_wizard() {
             output "${PURPLE}Install phpMyAdmin?"
             output "   \e[3m${GRAY}+ UFW\e[0m"
             echo -ne "Choose an option (Y/N): "
-
             read -r option
 
             case $option in
@@ -797,7 +832,6 @@ easy_menu() {
         output "${CYAN}T)${NC} Tools"
         output "${RED}Q)${NC} Quit"
         echo -ne "Choose an option: "
-
         read -r option
 
         case $option in
@@ -851,7 +885,6 @@ advanced_menu() {
         output "${CYAN}T)${NC} Tools"
         output "${RED}Q)${NC} Quit"
         echo -ne "Choose an option: "
-
         read -r option
 
         case $option in
